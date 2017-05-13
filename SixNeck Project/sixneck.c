@@ -269,20 +269,20 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 	location dir;
 	int _state = -1;
 	int basic_state = NONE_STATE;
-	if (start.dir == SOUTH) {
+	if (start.dir == EAST) {
 		dir.x = 1;
 		dir.y = 0;
 	}
-	else if (start.dir = SOUTH_EAST) {
+	else if (start.dir = NORTH_EAST) {
 		dir.x = 1;
-		dir.y = 1;
+		dir.y = -1;
 	}
-	else if (start.dir = EAST) {
+	else if (start.dir = SOUTH) {
 		dir.x = 0;
 		dir.y = 1;
 	}
-	else if (start.dir = NORTH_EAST) {
-		dir.x = -1;
+	else if (start.dir = SOUTH_EAST) {
+		dir.x = 1;
 		dir.y = 1;
 	}
 	if (mine == WHITE) {
@@ -353,10 +353,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				if (map[start.x + dir.x * 4][start.y + dir.x * 4] == mine) {
 					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+							basic_state = W;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+							basic_state = THETA0;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -364,10 +364,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+							basic_state = THETA1;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+							basic_state = SIGMA0;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -380,10 +380,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				else if (map[start.x + dir.x * 4][start.y + dir.x * 4] == EMPTY) {
 					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+							basic_state = THETA2;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+							basic_state = SIGMA1;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -391,10 +391,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+							basic_state = SIGMA2;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+							basic_state = GAMMA0;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -412,10 +412,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				if (map[start.x + dir.x * 4][start.y + dir.x * 4] == mine) {
 					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+							basic_state = THETA3;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+							basic_state = SIGMA3;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -874,20 +874,20 @@ int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location di
 				temp.y = j;	// Set y to i.
 				for (d = 0; d < DIR_MAX; d++) {
 					// Set dir where to check.
-					if (d == SOUTH) {
+					if (d == EAST) {
 						dir.x = 1;
 						dir.y = 0;
 					}
-					else if (d = SOUTH_EAST) {
+					else if (d = NORTH_EAST) {
 						dir.x = 1;
-						dir.y = 1;
+						dir.y = -1;
 					}
-					else if (d = EAST) {
+					else if (d = SOUTH) {
 						dir.x = 0;
 						dir.y = 1;
 					}
-					else if (d = NORTH_EAST) {
-						dir.x = -1;
+					else if (d = SOUTH_EAST) {
+						dir.x = 1;
 						dir.y = 1;
 					}
 
