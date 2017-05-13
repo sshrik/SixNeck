@@ -9,7 +9,7 @@
 */
 #define MAP_LENGTH 20
 #define DIR_MAX 4
-#define CANDIDATE_MAX 20
+#define CANDIDATE_MAX 30
 #define LOCATION_MAX 400
 
 #define _STATE_MAX 9
@@ -235,8 +235,7 @@ unsigned long long int get_state_priority(int state[][MAP_LENGTH][MAP_LENGTH], i
 int who_win(int map[][MAP_LENGTH], location where_put);
 int dir_row_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
 int dir_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
-void find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine);
-location decide_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine);
+location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine, int threshold);
 int add_stone(location where, int map[][MAP_LENGTH], int mine);
 void initialize_map(int map[][MAP_LENGTH]);
 void array1_initializer(int arr[], int length, int toInitialize);
@@ -1143,64 +1142,84 @@ int dir_win(int map[][MAP_LENGTH], location start, location dir, int mine) {
 	}
 }
 
-void find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine) {
+location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine, int threshold) {
 	// Find candidate location and save it to candidate.
-	// 후보 위치군은 다음에 어디에 두면 좋을까? 같은 것에 대한 후보 위치군이다.
-	// if no more candidate is recommended, save (-1, -1)
+	// if no more candidate is recommended, save (-1, -1).
+	// Check every area of map, do it, and check priority is increase or decrease.
+	// if increase, if the value is larger then threshold, added to candidate list.
 
-
-
-
-	
-}
-
-location decide_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine) {
 	// Decied where to put stone from candidate location list 'candidate'.
 	// ms, es, candidate, state_priority value with get_state_priority.
 	// 어디에 놓는 것이 내 state priority 를 최대화 시키면서, 상대 state priority 를 최소화 시키는지 확인 해야 한다.
-	location return_value;
+	// Calculate where to put.
+
+	location return_value, to;
+	location candidate[CANDIDATE_MAX];
 	unsigned long long int enemy_priority[CANDIDATE_MAX], mine_priority[CANDIDATE_MAX];
 	unsigned long long int now_mine = get_state_priority(ms, priority);
 	unsigned long long int now_enemy = get_state_priority(es, priority);
+	unsigned long long int temp_mine, temp_enemy;
 
+	int candidate_number = 0;
 	int temp_map[MAP_LENGTH][MAP_LENGTH];
 	int temp_ms[DIR_MAX][MAP_LENGTH][MAP_LENGTH], temp_es[DIR_MAX][MAP_LENGTH][MAP_LENGTH];
 	int i, j, temp_my_index, temp_enemy_index;
 
-	// Calculate where to put.
 	map_copy(temp_map, map);
 
-	for (i = 0; i < CANDIDATE_MAX; i++) {
-		if (candidate[i].x != -1) {
-			if (add_stone(candidate[i], temp_map, mine) == 1) {
-				search_state(temp_ms, temp_es, temp_map, mine);
-				mine_priority[i] = get_state_priority(temp_ms, priority);
-				enemy_priority[i] = get_state_priority(temp_es, priority);
-				// If we add at i to temp_map, then how change in state, and priority
+	for (i = 0; i < MAP_LENGTH; i++) {
+		to.x = i;
+		for (j = 0; j < MAP_LENGTH; j++) {
+			to.y = j;	// Check Every area.
+			if (candidate_number < CANDIDATE_MAX) {
+				if (add_stone(to, temp_map, mine) == 1) {
+					search_state(temp_ms, temp_es, temp_map, mine);
+					temp_mine = get_state_priority(temp_ms, priority);
+					temp_enemy = get_state_priority(temp_es, priority);
+					// Caculate changed priority or state.
+					if (now_mine < temp_mine) {
+						// If Changed value is larger than threshold, it wiil be candidate.
+						if (temp_mine - now_mine > threshold) {
+							location_copy(&to, &candidate[candidate_number]);
+							mine_priority[candidate_number] = temp_mine;
+							enemy_priority[candidate_number] = temp_enemy;
+							// Save it to existing array.
+							candidate_number++;
+						}
+					}
 
-				map_copy(temp_map, map);
-				array3_initializer(temp_ms, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
-				array3_initializer(temp_es, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
-				// Initializing array to reuse it.
-			}
-			else {
-				mine_priority[i] = NONE_STATE;
-				enemy_priority[i] = NONE_STATE;
+					if (now_enemy < temp_enemy) {
+						// If Changed value is larger than threshold, it wiil be candidate.
+						if (temp_enemy - now_enemy > threshold) {
+							location_copy(&to, &candidate[candidate_number]);
+							mine_priority[candidate_number] = temp_mine;
+							enemy_priority[candidate_number] = temp_enemy;
+							// Save it to existing array.
+							candidate_number++;
+						}
+					}
+
+					map_copy(temp_map, map);
+					array3_initializer(temp_ms, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
+					array3_initializer(temp_es, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
+					// Initialize to reuse.
+				}
 			}
 		}
 	}
+
 	//Decide where to put with calculated data.
 	temp_my_index = 0;
 	temp_enemy_index = 0;
-	for (i = 0; i < CANDIDATE_MAX; i++) {
-		if (now_mine - mine_priority[i] > now_mine - mine_priority[temp_my_index]) {
+	for (i = 0; i < candidate_number; i++) {
+		if (mine_priority[i] - now_mine > mine_priority[temp_my_index] - now_mine) {
 			temp_my_index = i;
 		} // Calculate biggist priority index of my state.
-		if (now_enemy - mine_priority[i] > now_enemy - mine_priority[temp_enemy_index]) {
+		if ( mine_priority[i] - now_enemy > mine_priority[temp_enemy_index] - now_enemy) {
 			temp_enemy_index = i;
 		} // Calculate biggist priority index of enemy state.
 	}
-	if (now_mine - mine_priority[temp_my_index] >= now_enemy - mine_priority[temp_enemy_index]) {
+	if (mine_priority[temp_my_index] - now_mine >= mine_priority[temp_enemy_index] - now_enemy) {
 		return_value = candidate[temp_my_index];
 	}
 	else {
