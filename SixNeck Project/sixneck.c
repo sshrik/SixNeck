@@ -224,14 +224,12 @@ typedef struct {
 }vector;
 
 void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int map[][MAP_LENGTH], int mine);
-int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]);
-int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start);
-int dir_check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir);
+int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location dri[]);
+int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir);
 int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]);
 int check_aw(int state[][MAP_LENGTH][MAP_LENGTH], vector start);
 unsigned long long int get_state_priority(int state[][MAP_LENGTH][MAP_LENGTH], int priority[]);
-int can_win(int ms[][MAP_LENGTH][MAP_LENGTH], int mine);
-int can_lose(int es[][MAP_LENGTH][MAP_LENGTH], int mine);
+int can_win(int state[][MAP_LENGTH][MAP_LENGTH], vector mw[], location mw_dir[], vector aw[], int mine);
 int who_win(int map[][MAP_LENGTH], location where_put);
 int dir_row_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
 int dir_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
@@ -263,12 +261,13 @@ void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LEN
 
 }
 
-int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]) {
-	// Find all mw location in 'state' and put to 'where'.
+int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location dir_list[]) {
+	// Find all mw location in 'state' and put to 'where'. 'dir' is the direction of 'where'.
 	// And return number of mw number.
-	int i, j, k;
+	int i, j, k, d;
 	int vector_num = 0;
 	vector temp;
+	location dir;
 
 	for (k = 0; k < DIR_MAX; k++) {
 		temp.dir = k;	// Set dir to k.
@@ -277,10 +276,31 @@ int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]) {
 			temp.x = i;	// Set x to i.
 			for (j = 0; j < MAP_LENGTH; j++) {
 				temp.y = j;	// Set y to i.
-				if (check_mw(state, temp) == 1) {
-					// If mw from temp is right,
-					vector_copy(&where[vector_num], &temp);
-					vector_num++;
+				for (d = 0; d < DIR_MAX; d++) {
+					// Set dir where to check.
+					if (d == SOUTH) {
+						dir.x = 1;
+						dir.y = 0;
+					}
+					else if (d = SOUTH_EAST) {
+						dir.x = 1;
+						dir.y = 1;
+					}
+					else if (d = EAST) {
+						dir.x = 0;
+						dir.y = 1;
+					}
+					else if (d = NORTH_EAST) {
+						dir.x = -1;
+						dir.y = 1;
+					}
+
+					if (check_mw(state, temp, dir) == 1) {
+						// If mw from temp is right, add to list.
+						vector_copy(&where[vector_num], &temp);
+						location_copy(&dir_list[vector_num], &dir);
+						vector_num++;
+					}
 				}
 			}
 		}
@@ -289,32 +309,18 @@ int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]) {
 	return vector_num;
 }
 
-int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start) {
+int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir) {
 	//Check from state[start.dir][start.x][start.y] does it is mw.
+	// Because mw need 3 aw, so location dir are needed.
 	//If right, return 1. Else return 0;
 	/*	mw = must win, aw = amado win À» ÀÇ¹ÌÇÑ´Ù.
 	mw set : aw set ÀÌ ¿¬¼ÓÇØ¼­ 3°³ ºÙ¾î ÀÖÀ» ¶§.
 	*/
-	location dir;
-	if (start.dir == SOUTH) {
-
-	}
-	else if (start.dir = SOUTH_EAST) {
-
-	}
-	if (dir_check_mw(state, start, ) == 1) {
-
-	}
-
-}
-
-int dir_check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir) {
-	// Check given direction dir, if 3 aw is appeared.
 	int i;
 	vector temp;
 	vector_copy(&temp, &start);
-	for(i = 0; i < 3; i++) {
-		if (check_aw(state, temp) == 1) {
+	for (i = 0; i < 3; i++) {
+		if (check_aw(state, temp) == 1) {	// To check 3 aw in case.
 			temp.x += dir.x;
 			temp.y += dir.y;
 		}
@@ -392,19 +398,23 @@ unsigned long long int get_state_priority(int state[][MAP_LENGTH][MAP_LENGTH], i
 
 }
 
-int can_win(int ms[][MAP_LENGTH][MAP_LENGTH], int mine) {
+int can_win(int state[][MAP_LENGTH][MAP_LENGTH], vector mw[], location mw_dir[], vector aw[],int mine) {
 	// mine's turn, if ms has aw set or mw set, then return 1;
 	// else return 0;
+	// if mine == real my value, then can win. if mine == real enemy value, then can lose.
 	//mw + mw ( °ãÃÄµµ »ó°ü ¾ø´Ù. ) / mw + aw ( °ãÄ¡´Â ºÎºÐÀÌ ºó Ä­ÀÌ X ) / aw + aw + aw ( °ãÄ¡´Â ºÎºÐÀÌ ºó Ä­ÀÌ X ) ·Î ÆÇ´Ü.
-	
+	int i, j, k;
+	int return_value;
+
+	for (k = 0; k < DIR_MAX; k++) {
+		for (i = 0; i < MAP_LENGTH; i++) {
+			for (j = 0; j < MAP_LENGTH; j++) {
+				
+			}
+		}
+	}
 }
 
-int can_lose(int es[][MAP_LENGTH][MAP_LENGTH], int mine) {
-	// mine's turn, if es has aw set or mw set, then return 1;
-	// else return 0;
-	//mw + mw ( °ãÃÄµµ »ó°ü ¾ø´Ù. ) / mw + aw ( °ãÄ¡´Â ºÎºÐÀÌ ºó Ä­ÀÌ X ) / aw + aw + aw ( °ãÄ¡´Â ºÎºÐÀÌ ºó Ä­ÀÌ X ) ·Î ÆÇ´Ü.
-
-}
 int who_win(int map[][MAP_LENGTH], location where_put) {
 	/*	Check map from location 'where_put'
 		if black win	return BLACK;
