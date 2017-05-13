@@ -203,7 +203,6 @@ W	¡Û¡Û¡Û¡Û¡Û¡Û
 
 //State is defigned like DELTA5 * _STATE_MAX + _5 or GAMMA7 * _2
 
-
 #define STATE_LENGTH 451
 // 50 * 9 + 1 °³
 
@@ -213,6 +212,8 @@ aw set : { ¥ä, ¥è set } X { _0, _2, _6, _8 }
 */
 
 #define GENERATION_MAX 30
+#define PARENT_MAX 4
+#define CROSS_POINT_MAX 30
 
 typedef struct {
 	short x;
@@ -225,6 +226,7 @@ typedef struct {
 	short dir;	// will be value like SOUTH
 }vector;
 
+// AI Functions
 void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int map[][MAP_LENGTH], int mine);
 int get_state(int map[][MAP_LENGTH], int mine, vector start);
 int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location dri[]);
@@ -238,6 +240,8 @@ int dir_row_win(int map[][MAP_LENGTH], location where_put, location dir, int min
 int dir_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
 location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine, int threshold);
 int add_stone(location where, int map[][MAP_LENGTH], int mine);
+
+// Utilization Functions
 void initialize_map(int map[][MAP_LENGTH]);
 void array1_initializer(int arr[], int length, int toInitialize);
 void array2_initializer(int arr[], int length1, int length2, int toInitialize);
@@ -246,9 +250,11 @@ void location_copy(location *src, location *dst);
 void vector_copy(vector *src, vector *dst);
 void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH]);
 
+// Gen Algorithm functions
 void select_parent(int parent[][STATE_LENGTH], int selected[][STATE_LENGTH], int fitness[]);
 void set_fitness(int parent[][STATE_LENGTH], int fitness[]);
 void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENGTH]);
+void cross_product(int p1[], int p2[], int cross[]);
 void generate_mutation(int generation[][STATE_LENGTH], int fitness[]);
 
 int main() {
@@ -1314,17 +1320,61 @@ void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH] ) {
 }
 
 void select_parent(int parent[][STATE_LENGTH], int selected[][STATE_LENGTH], int fitness[]) {
+	// Select 4 parents from parent[GENERATION_MAX][STATE_LENGTH] with fitness[GENERATION_MAX] values.
+	// We will use rullet-wheel method to select parents.
+
 
 }
 
-void set_fitness(int parent[][STATE_LENGTH], int fitness[]) {
+void set_fitness(int generation[][STATE_LENGTH], int fitness[]) {
+	// Set fitness score to fitenss[GENERATION_MAX].
+	// fitness will be win percent to others.
+	// More specific, fitness[i] is probability of victory for others.
+	// Probability of victory is average of result of every other generations.
 
 }
 
 void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENGTH]) {
+	// Doing CROSS_POINT_MAX - point Cross product from each parent[GENERATION_MAX][STATE_LENGTH] pair.
+	// Do Cross product parent pair (0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)
+	// Each pair generate 5 next generation.
 
 }
 
+void cross_product(int p0[], int p1[], int gen[] ,int cross[]) {
+	// Doing cross product.
+	// gen = { p1|p2|p1|p2 ... } for cross[i] in range(0, CORSS_POINT_MAX)
+	int par = 0;
+	int cross_number = 0;
+	int i;
+
+	for (i = 0; i < STATE_LENGTH; i++) {
+		if (i < cross[cross_number]) {
+			if (par == 0) {
+				gen[i] = p0[i];
+			}
+			else {
+				gen[i] = p1[i];
+			}
+		}
+		else {
+			cross_number++;
+			if (par == 0) {
+				par = 1;
+				gen[i] = p1[i];
+			}
+			else {
+				par = 0;
+				gen[i] = p0[i];
+			}
+		}
+	}
+}
+
 void generate_mutation(int generation[][STATE_LENGTH], int fitness[]) {
+	// Mutation is appear at generation[GENERATION_MAX][STATE_LENGTH] with percent of fitness[].
+	// Mutation appear at [i] change into random number.
+	// The probability of mutation will be low if parent's fitness average is low.
+
 
 }
