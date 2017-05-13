@@ -205,6 +205,7 @@ W	○○○○○○
 
 
 #define STATE_LENGTH 451
+// 50 * 9 + 1 개
 
 /*	mw = must win, aw = amado win 을 의미한다.
 mw set : aw set 이 연속해서 3개 붙어 있을 때.
@@ -229,6 +230,7 @@ int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location dr
 int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir);
 int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]);
 int check_aw(int state[][MAP_LENGTH][MAP_LENGTH], vector start);
+void set_prioirity(int priority[], int to[]);
 unsigned long long int get_state_priority(int state[][MAP_LENGTH][MAP_LENGTH], int priority[]);
 int can_win(int state[][MAP_LENGTH][MAP_LENGTH], vector mw[], location mw_dir[], vector aw[], int mine);
 int who_win(int map[][MAP_LENGTH], location where_put);
@@ -1033,13 +1035,33 @@ int check_aw(int state[][MAP_LENGTH][MAP_LENGTH], vector start) {
 	return return_value;
 }
 
+void set_prioirity(int priority[], int to[]) {
+	// 0 = NONE_STATE.
+	// priority[STATE + 1] = STATE's priority;
+	// Max is STATE_LENGTH.
+	int i;
+	for (i = 0; i < STATE_LENGTH; i++) {
+		priority[i] = to[i];
+	}
+}
+
 unsigned long long int get_state_priority(int state[][MAP_LENGTH][MAP_LENGTH], int priority[]) {
 	// Calculate 'state' priority with given array priority.
 	// state priority will be very large, so we return it data type of unsigned long long int.
 	// Priority is always plus value, so we will use unsigned value.
+	unsigned long long int return_value = 0;
+	int d, i, j;
+	
+	// Caculate with state value.
+	for (d = 0; d < DIR_MAX; d++) {
+		for (i = 0; i < MAP_LENGTH; i++) {
+			for (j = 0; j < MAP_LENGTH; j++) {
+				return_value += priority[state[d][i][j] + 1];
+			}
+		}
+	}
 
-
-
+	return return_value;
 }
 
 int can_win(int state[][MAP_LENGTH][MAP_LENGTH], vector mw[], location mw_dir[], vector aw[],int mine) {
@@ -1144,6 +1166,7 @@ int dir_win(int map[][MAP_LENGTH], location start, location dir, int mine) {
 void find_candidate_location(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine) {
 	// Find candidate location and save it to candidate.
 	// 후보 위치군은 다음에 어디에 두면 좋을까? 같은 것에 대한 후보 위치군이다.
+
 
 }
 
