@@ -224,6 +224,7 @@ typedef struct {
 }vector;
 
 void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int map[][MAP_LENGTH], int mine);
+int get_state(int map[][MAP_LENGTH], int mine, location dir);
 int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location dri[]);
 int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir);
 int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]);
@@ -258,6 +259,12 @@ void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LEN
 	/*	Check my state(ms), enemy sate(es) from map and save to there.
 		'mine' will be BLACK or WHITE, which is my color.
 		State will save like ALPHA0 * _0 */
+
+
+
+}
+
+int get_state(int map[][MAP_LENGTH], int mine, location dir) {
 
 }
 
@@ -396,13 +403,16 @@ unsigned long long int get_state_priority(int state[][MAP_LENGTH][MAP_LENGTH], i
 	// state priority will be very large, so we return it data type of unsigned long long int.
 	// Priority is always plus value, so we will use unsigned value.
 
+
+
 }
 
 int can_win(int state[][MAP_LENGTH][MAP_LENGTH], vector mw[], location mw_dir[], vector aw[],int mine) {
-	// mine's turn, if ms has aw set or mw set, then return 1;
-	// else return 0;
+	// mine's turn, if ms has aw set or mw set, then return 1, else return 0;
 	// if mine == real my value, then can win. if mine == real enemy value, then can lose.
-	//mw + mw ( °ãÃÄµµ »ó°ü ¾ø´Ù. ) / mw + aw ( °ãÄ¡´Â ºÎºÐÀÌ ºó Ä­ÀÌ X ) / aw + aw + aw ( °ãÄ¡´Â ºÎºÐÀÌ ºó Ä­ÀÌ X ) ·Î ÆÇ´Ü.
+	/* mw + mw ( °ãÃÄµµ »ó°ü ¾ø´Ù. ) 
+	mw + aw ( °ãÄ¡´Â ºÎºÐÀÌ ºó Ä­ÀÌ X ) 
+	aw + aw + aw ( °ãÄ¡´Â ºÎºÐÀÌ ºó Ä­ÀÌ X ) ·Î ÆÇ´Ü.*/
 	int i, j, k;
 	int return_value;
 
