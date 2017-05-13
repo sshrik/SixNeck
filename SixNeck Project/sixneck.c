@@ -214,6 +214,7 @@ aw set : { ¥ä, ¥è set } X { _0, _2, _6, _8 }
 #define GENERATION_MAX 30
 #define PARENT_MAX 4
 #define CROSS_POINT_MAX 30
+#define SIVILING_MAX 5
 
 typedef struct {
 	short x;
@@ -256,11 +257,13 @@ void set_fitness(int parent[][STATE_LENGTH], int fitness[]);
 void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENGTH]);
 void cross_product(int p0[], int p1[], int gen[], int cross[]);
 void generate_mutation(int generation[][STATE_LENGTH], int fitness[]);
+void suffle_generation(int generation[][STATE_LENGTH]);
 
 int main() {
 	int priority[STATE_LENGTH];
 	int map[MAP_LENGTH][MAP_LENGTH];
 
+	srand((unsigned)time(NULL));
 
 
 	return 0;
@@ -1362,8 +1365,64 @@ void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENG
 	// Doing CROSS_POINT_MAX - point Cross product from each parent[GENERATION_MAX][STATE_LENGTH] pair.
 	// Do Cross product parent pair (0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)
 	// Each pair generate 5 next generation.
+	int i, gen_num = 0;
+	int cross[CROSS_POINT_MAX];
+	for (i = 0; i < SIVILING_MAX; i++) {
+		// Generate with (0, 1) parents pair.
+		generate_cross_point(cross);
+		cross_product(&parent[0], &parent[1], &geneartion[gen_num], cross);
+		gen_num++;
+	}
+	for (i = 0; i < SIVILING_MAX; i++) {
+		// Generate with (0, 2) parents pair.
+		generate_cross_point(cross);
+		cross_product(&parent[0], &parent[2], &geneartion[gen_num], cross);
+		gen_num++;
+	}
+	for (i = 0; i < SIVILING_MAX; i++) {
+		// Generate with (0, 3) parents pair.
+		generate_cross_point(cross);
+		cross_product(&parent[0], &parent[3], &geneartion[gen_num], cross);
+		gen_num++;
+	}
+	for (i = 0; i < SIVILING_MAX; i++) {
+		// Generate with (1, 2) parents pair.
+		generate_cross_point(cross);
+		cross_product(&parent[1], &parent[2], &geneartion[gen_num], cross);
+		gen_num++;
+	}
+	for (i = 0; i < SIVILING_MAX; i++) {
+		// Generate with (1, 3) parents pair.
+		generate_cross_point(cross);
+		cross_product(&parent[1], &parent[3], &geneartion[gen_num], cross);
+		gen_num++;
+	}
+	for (i = 0; i < SIVILING_MAX; i++) {
+		// Generate with (2, 3) parents pair.
+		generate_cross_point(cross);
+		cross_product(&parent[2], &parent[3], &geneartion[gen_num], cross);
+		gen_num++;
+	}
+}
 
+void generate_cross_point(int cross[]) {
+	int i, j, temp;
+	// Generate random cross-point.
+	for (i = 0; i < CROSS_POINT_MAX; i++) {
+		// rand() need to chagned.
+		cross[i] = rand() % STATE_LENGTH;
+	}
 
+	// Sorting with large number.
+	for (i = 0; i < CROSS_POINT_MAX - 1; i++) {
+		for (j = i + 1; j < CROSS_POINT_MAX; j++) {
+			if (cross[i] < cross[j]) {
+				temp = cross[i];
+				cross[i] = cross[j];
+				cross[j] = temp;
+			}
+		}
+	}
 }
 
 void cross_product(int p0[], int p1[], int gen[] ,int cross[]) {
@@ -1384,6 +1443,9 @@ void cross_product(int p0[], int p1[], int gen[] ,int cross[]) {
 		}
 		else {
 			cross_number++;
+			while (cross[cross_number - 1] == cross[cross_number]) {
+				cross_number++;
+			}
 			if (par == 0) {
 				par = 1;
 				gen[i] = p1[i];
@@ -1400,6 +1462,13 @@ void generate_mutation(int generation[][STATE_LENGTH], int fitness[]) {
 	// Mutation is appear at generation[GENERATION_MAX][STATE_LENGTH] with percent of fitness[].
 	// Mutation appear at [i] change into random number.
 	// The probability of mutation will be low if parent's fitness average is low.
+	
 
+
+}
+
+void suffle_generation(int generation[][STATE_LENGTH]) {
+	// generation is generated with in order of parents.
+	// so suffle is needed.
 
 }
