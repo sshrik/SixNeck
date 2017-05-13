@@ -259,13 +259,33 @@ void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LEN
 	/*	Check my state(ms), enemy sate(es) from map and save to there.
 		'mine' will be BLACK or WHITE, which is my color.
 		State will save like ALPHA0 * _0 */
+	int i, j, d;
+	vector start;
 
+	for (d = 0; d < DIR_MAX; d++) {
+		start.dir = d;
+		for (i = 0; i < MAP_LENGTH; i++) {
+			start.x = i;
+			for (j = 0; j < MAP_LENGTH; j++) {
+				start.y = j;
+				if (mine == BLACK) {
+					ms[d][i][j] = get_state(map, BLACK, start);
+					es[d][i][j] = get_state(map, WHITE, start);
+				}
+				else {
+					ms[d][i][j] = get_state(map, WHITE, start);
+					es[d][i][j] = get_state(map, BLACK, start);
+				}
+			}
+		}
+	}
 
 
 }
 
 int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 	//Check map[start.x][start.y] at direction of start.dir.
+	//Return -1 if NONE_STATE, else return state.
 	location dir;
 	int _state = -1;
 	int basic_state = NONE_STATE;
@@ -871,11 +891,11 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 		basic_state = NONE_STATE;
 	}
 
-	if (_state > 0 && basic_state > 0) {
+	if (_state > 0 || basic_state > 0) {
 		return (basic_state * _STATE_MAX) + _state;
 	}
 	else {
-		return -1;
+		return NONE_STATE;
 	}
 }
 
@@ -900,15 +920,15 @@ int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location di
 						dir.x = 1;
 						dir.y = 0;
 					}
-					else if (d = NORTH_EAST) {
+					else if (d == NORTH_EAST) {
 						dir.x = 1;
 						dir.y = -1;
 					}
-					else if (d = SOUTH) {
+					else if (d == SOUTH) {
 						dir.x = 0;
 						dir.y = 1;
 					}
-					else if (d = SOUTH_EAST) {
+					else if (d == SOUTH_EAST) {
 						dir.x = 1;
 						dir.y = 1;
 					}
