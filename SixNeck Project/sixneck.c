@@ -232,20 +232,19 @@ int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]);
 int check_aw(int state[][MAP_LENGTH][MAP_LENGTH], vector start);
 void set_prioirity(int priority[], int to[]);
 unsigned long long int get_state_priority(int state[][MAP_LENGTH][MAP_LENGTH], int priority[]);
-int can_win(int state[][MAP_LENGTH][MAP_LENGTH], vector mw[], location mw_dir[], vector aw[], int mine);
 int who_win(int map[][MAP_LENGTH], location where_put);
 int dir_row_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
 int dir_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
-void find_candidate_location(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine);
-location decide_location(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine);
-void add_stone(location where, int map[][MAP_LENGTH], int mine);
+void find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine);
+location decide_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine);
+int add_stone(location where, int map[][MAP_LENGTH], int mine);
 void initialize_map(int map[][MAP_LENGTH]);
-void array1_initailizer(int arr[], int length, int toInitialize);
-void array2_initailizer(int arr[], int length1, int length2, int toInitialize);
-void array3_initailizer(int arr[], int length1, int length2, int length3, int toInitialize);
+void array1_initializer(int arr[], int length, int toInitialize);
+void array2_initializer(int arr[], int length1, int length2, int toInitialize);
+void array3_initializer(int arr[], int length1, int length2, int length3, int toInitialize);
 void location_copy(location *src, location *dst);
 void vector_copy(vector *src, vector *dst);
-
+void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH]);
 
 int main() {
 	int priority[STATE_LENGTH];
@@ -255,7 +254,6 @@ int main() {
 
 	return 0;
 }
-
 
 void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int map[][MAP_LENGTH], int mine) {
 	/*	Check my state(ms), enemy sate(es) from map and save to there.
@@ -1064,24 +1062,6 @@ unsigned long long int get_state_priority(int state[][MAP_LENGTH][MAP_LENGTH], i
 	return return_value;
 }
 
-int can_win(int state[][MAP_LENGTH][MAP_LENGTH], vector mw[], location mw_dir[], vector aw[],int mine) {
-	// mine's turn, if ms has aw set or mw set, then return 1, else return 0;
-	// if mine == real my value, then can win. if mine == real enemy value, then can lose.
-	/* mw + mw ( 겹쳐도 상관 없다. ) 
-	mw + aw ( 겹치는 부분이 빈 칸이 X ) 
-	aw + aw + aw ( 겹치는 부분이 빈 칸이 X ) 로 판단.*/
-	int i, j, k;
-	int return_value;
-
-	for (k = 0; k < DIR_MAX; k++) {
-		for (i = 0; i < MAP_LENGTH; i++) {
-			for (j = 0; j < MAP_LENGTH; j++) {
-				
-			}
-		}
-	}
-}
-
 int who_win(int map[][MAP_LENGTH], location where_put) {
 	/*	Check map from location 'where_put'
 		if black win	return BLACK;
@@ -1163,24 +1143,83 @@ int dir_win(int map[][MAP_LENGTH], location start, location dir, int mine) {
 	}
 }
 
-void find_candidate_location(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine) {
+void find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine) {
 	// Find candidate location and save it to candidate.
 	// 후보 위치군은 다음에 어디에 두면 좋을까? 같은 것에 대한 후보 위치군이다.
+	// if no more candidate is recommended, save (-1, -1)
 
 
+
+
+	
 }
 
-location decide_location(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine) {
+location decide_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], location candidate[], int priority[], int mine) {
 	// Decied where to put stone from candidate location list 'candidate'.
 	// ms, es, candidate, state_priority value with get_state_priority.
 	// 어디에 놓는 것이 내 state priority 를 최대화 시키면서, 상대 state priority 를 최소화 시키는지 확인 해야 한다.
+	location return_value;
+	unsigned long long int enemy_priority[CANDIDATE_MAX], mine_priority[CANDIDATE_MAX];
+	unsigned long long int now_mine = get_state_priority(ms, priority);
+	unsigned long long int now_enemy = get_state_priority(es, priority);
 
+	int temp_map[MAP_LENGTH][MAP_LENGTH];
+	int temp_ms[DIR_MAX][MAP_LENGTH][MAP_LENGTH], temp_es[DIR_MAX][MAP_LENGTH][MAP_LENGTH];
+	int i, j, temp_my_index, temp_enemy_index;
 
+	// Calculate where to put.
+	map_copy(temp_map, map);
+
+	for (i = 0; i < CANDIDATE_MAX; i++) {
+		if (candidate[i].x != -1) {
+			if (add_stone(candidate[i], temp_map, mine) == 1) {
+				search_state(temp_ms, temp_es, temp_map, mine);
+				mine_priority[i] = get_state_priority(temp_ms, priority);
+				enemy_priority[i] = get_state_priority(temp_es, priority);
+				// If we add at i to temp_map, then how change in state, and priority
+
+				map_copy(temp_map, map);
+				array3_initializer(temp_ms, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
+				array3_initializer(temp_es, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
+				// Initializing array to reuse it.
+			}
+			else {
+				mine_priority[i] = NONE_STATE;
+				enemy_priority[i] = NONE_STATE;
+			}
+		}
+	}
+	//Decide where to put with calculated data.
+	temp_my_index = 0;
+	temp_enemy_index = 0;
+	for (i = 0; i < CANDIDATE_MAX; i++) {
+		if (now_mine - mine_priority[i] > now_mine - mine_priority[temp_my_index]) {
+			temp_my_index = i;
+		} // Calculate biggist priority index of my state.
+		if (now_enemy - mine_priority[i] > now_enemy - mine_priority[temp_enemy_index]) {
+			temp_enemy_index = i;
+		} // Calculate biggist priority index of enemy state.
+	}
+	if (now_mine - mine_priority[temp_my_index] >= now_enemy - mine_priority[temp_enemy_index]) {
+		return_value = candidate[temp_my_index];
+	}
+	else {
+		return_value = candidate[temp_enemy_index];
+	}
+	return return_value;
 }
 
-void add_stone(location where, int map[][MAP_LENGTH], int mine) {
+int add_stone(location where, int map[][MAP_LENGTH], int mine) {
 	// Add stone to 'where' which stone is 'mine', BLACK, WHITE.
-	map[where.x][where.y] = mine;
+	// If can't do, return 0, else 1
+
+	if (map[where.x][where.y] == EMPTY) {	
+		map[where.x][where.y] = mine;
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 
 void initialize_map(int map[][MAP_LENGTH]) {
@@ -1191,7 +1230,7 @@ void initialize_map(int map[][MAP_LENGTH]) {
 	// Using below function.
 }
 
-void array1_initailizer(int arr[], int length, int toInitialize) {
+void array1_initializer(int arr[], int length, int toInitialize) {
 	// Initialize one dimension array with length 'length' to toInitialize.
 	int i;
 
@@ -1200,7 +1239,7 @@ void array1_initailizer(int arr[], int length, int toInitialize) {
 	}// arr[i] = toInitialize for every i in range 0 ~ max.
 }
 
-void array2_initailizer(int arr[], int length1, int length2, int toInitialize) {
+void array2_initializer(int arr[], int length1, int length2, int toInitialize) {
 	// Initialize two dimension array with length 'length1' and 'length2' to toInitialize.
 	int i, j;
 
@@ -1212,7 +1251,7 @@ void array2_initailizer(int arr[], int length1, int length2, int toInitialize) {
 
 }
 
-void array3_initailizer(int arr[], int length1, int length2, int length3, int toInitialize) {
+void array3_initializer(int arr[], int length1, int length2, int length3, int toInitialize) {
 	// Initialize two dimension array with length 'length1', 'length2' and 'length3' to toInitialize.
 	int i, j, k;
 
@@ -1237,4 +1276,14 @@ void vector_copy(vector *src, vector *dst) {
 	dst->x = src->x;
 	dst->y = src->y;
 	dst->dir = src->dir;
+}
+
+void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH] ) {
+	int i, j;
+
+	for (i = 0; i < MAP_LENGTH; i++) {
+		for (j = 0; j < MAP_LENGTH; j++) {
+			temp_map[i][j] = map[i][j];
+		}
+	}
 }
