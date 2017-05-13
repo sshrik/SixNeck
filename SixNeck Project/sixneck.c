@@ -224,7 +224,7 @@ typedef struct {
 }vector;
 
 void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int map[][MAP_LENGTH], int mine);
-int get_state(int map[][MAP_LENGTH], int mine, location dir);
+int get_state(int map[][MAP_LENGTH], int mine, vector start);
 int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location dri[]);
 int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir);
 int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]);
@@ -264,8 +264,93 @@ void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LEN
 
 }
 
-int get_state(int map[][MAP_LENGTH], int mine, location dir) {
+int get_state(int map[][MAP_LENGTH], int mine, vector start) {
+	//Check map[start.x][start.y] at direction of start.dir.
+	location dir;
+	int _state = -1;
+	int basic_state = -1;
+	if (start.dir == SOUTH) {
+		dir.x = 1;
+		dir.y = 0;
+	}
+	else if (start.dir = SOUTH_EAST) {
+		dir.x = 1;
+		dir.y = 1;
+	}
+	else if (start.dir = EAST) {
+		dir.x = 0;
+		dir.y = 1;
+	}
+	else if (start.dir = NORTH_EAST) {
+		dir.x = -1;
+		dir.y = 1;
+	}
+	/*
+#define EMPTY 0
+#define BLACK 1
+#define WHITE 2
+#define BLOCKING 3
+	*/
+	if (mine == WHITE) {
+		if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.x * 7] == EMPTY) {
 
+		}
+		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.x * 7] == BLACK) {
+
+		}
+		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.x * 7] == WHITE) {
+
+		}
+		else if (map[start.x][start.y] == WHITE && map[start.x + dir.x * 7][start.y + dir.x * 7] == EMPTY) {
+
+		}
+		else if (map[start.x][start.y] == WHITE && map[start.x + dir.x * 7][start.y + dir.x * 7] == WHITE) {
+
+		}
+		else if (map[start.x][start.y] == WHITE && map[start.x + dir.x * 7][start.y + dir.x * 7] == BLACK) {
+
+		}
+		else if (map[start.x][start.y] == BLACK && map[start.x + dir.x * 7][start.y + dir.x * 7] == EMPTY) {
+
+		}
+		else if (map[start.x][start.y] == BLACK && map[start.x + dir.x * 7][start.y + dir.x * 7] == WHITE) {
+
+		}
+		else if (map[start.x][start.y] == BLACK && map[start.x + dir.x * 7][start.y + dir.x * 7] == BLACK) {
+
+		}
+	}
+	else {
+		if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.x * 7] == EMPTY) {
+
+		}
+		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.x * 7] == BLACK) {
+
+		}
+		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.x * 7] == WHITE) {
+
+		}
+		else if (map[start.x][start.y] == BLACK && map[start.x + dir.x * 7][start.y + dir.x * 7] == EMPTY) {
+
+		}
+		else if (map[start.x][start.y] == BLACK && map[start.x + dir.x * 7][start.y + dir.x * 7] == BLACK) {
+
+		}
+		else if (map[start.x][start.y] == BLACK && map[start.x + dir.x * 7][start.y + dir.x * 7] == WHITE) {
+
+		}
+		else if (map[start.x][start.y] == WHITE && map[start.x + dir.x * 7][start.y + dir.x * 7] == EMPTY) {
+
+		}
+		else if (map[start.x][start.y] == WHITE && map[start.x + dir.x * 7][start.y + dir.x * 7] == BLACK) {
+
+		}
+		else if (map[start.x][start.y] == WHITE && map[start.x + dir.x * 7][start.y + dir.x * 7] == WHITE) {
+
+		}
+	}
+
+	return (basic_state * _STATE_MAX) + _state;
 }
 
 int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location dir_list[]) {
