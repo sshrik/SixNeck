@@ -226,6 +226,7 @@ typedef struct {
 void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int map[][MAP_LENGTH], int mine);
 int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]);
 int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start);
+int dir_check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir);
 int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]);
 int check_aw(int state[][MAP_LENGTH][MAP_LENGTH], vector start);
 unsigned long long int get_state_priority(int state[][MAP_LENGTH][MAP_LENGTH], int priority[]);
@@ -294,6 +295,39 @@ int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start) {
 	/*	mw = must win, aw = amado win 을 의미한다.
 	mw set : aw set 이 연속해서 3개 붙어 있을 때.
 	*/
+	location dir;
+	if (start.dir == SOUTH) {
+
+	}
+	else if (start.dir = SOUTH_EAST) {
+
+	}
+	if (dir_check_mw(state, start, ) == 1) {
+
+	}
+
+}
+
+int dir_check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir) {
+	// Check given direction dir, if 3 aw is appeared.
+	int i;
+	vector temp;
+	vector_copy(&temp, &start);
+	for(i = 0; i < 3; i++) {
+		if (check_aw(state, temp) == 1) {
+			temp.x += dir.x;
+			temp.y += dir.y;
+		}
+		else {
+			break;
+		}
+	}
+	if (i != 3) {
+		return 0;
+	}
+	else {
+		return 1;
+	}
 }
 
 int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]) {
