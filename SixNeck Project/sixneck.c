@@ -1322,8 +1322,32 @@ void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH] ) {
 void select_parent(int parent[][STATE_LENGTH], int selected[][STATE_LENGTH], int fitness[]) {
 	// Select 4 parents from parent[GENERATION_MAX][STATE_LENGTH] with fitness[GENERATION_MAX] values.
 	// We will use rullet-wheel method to select parents.
+	int i, j, temp;
+	int index[GENERATION_MAX];
+	for (i = 0; i < GENERATION_MAX; i++) {
+		index[i] = i;
+	}
 
+	// Sort with fitness value and take top 4.
+	for (i = 0; i < GENERATION_MAX - 1; i++) {
+		for (j = i + 1; j < GENERATION_MAX; j++) {
+			if (fitness[i] < fitness[j]) {
+				temp = fitness[i];
+				fitness[i] = fitness[j];
+				fitness[j] = temp;
 
+				temp = index[i];
+				index[i] = index[j];
+				index[j] = temp;
+				// index is chagned too, so can calculate value of original index.
+			}
+		}
+	}
+	for (i = 0; i < PARENT_MAX; i++) {
+		for (j = 0; j < STATE_LENGTH; j++) {
+			selected[i][j] = parent[index[i]][j];
+		}
+	}
 }
 
 void set_fitness(int generation[][STATE_LENGTH], int fitness[]) {
@@ -1338,6 +1362,7 @@ void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENG
 	// Doing CROSS_POINT_MAX - point Cross product from each parent[GENERATION_MAX][STATE_LENGTH] pair.
 	// Do Cross product parent pair (0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)
 	// Each pair generate 5 next generation.
+
 
 }
 
