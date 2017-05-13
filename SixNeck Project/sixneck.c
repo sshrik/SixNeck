@@ -254,7 +254,7 @@ void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH]);
 void select_parent(int parent[][STATE_LENGTH], int selected[][STATE_LENGTH], int fitness[]);
 void set_fitness(int parent[][STATE_LENGTH], int fitness[]);
 void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENGTH]);
-void cross_product(int p1[], int p2[], int cross[]);
+void cross_product(int p0[], int p1[], int gen[], int cross[]);
 void generate_mutation(int generation[][STATE_LENGTH], int fitness[]);
 
 int main() {
@@ -1129,6 +1129,8 @@ int dir_row_win(int map[][MAP_LENGTH], location where_put, location dir, int min
 			break;
 		}
 	}
+
+	return result;
 }
 
 int dir_win(int map[][MAP_LENGTH], location start, location dir, int mine) {
@@ -1255,9 +1257,7 @@ int add_stone(location where, int map[][MAP_LENGTH], int mine) {
 
 void initialize_map(int map[][MAP_LENGTH]) {
 	// Initialize map to EMPTY which is defined.
-	int i, j;
-
-	array2_initailizer(map, MAP_LENGTH, MAP_LENGTH, EMPTY);
+	array2_initializer(map, MAP_LENGTH, MAP_LENGTH, EMPTY);
 	// Using below function.
 }
 
