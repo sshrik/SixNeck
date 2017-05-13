@@ -287,7 +287,16 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 	}
 	if (mine == WHITE) {
 		// Check _State
-		if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.y * 7] == EMPTY) {
+		if (start.x > MAP_LENGTH - 7 && dir.x == 1) {  //동쪽 견제
+			_state = NONE_STATE;   //그러므로 check_~ function에서 temp < 0 이 되면 나오면 계산 결과 무시
+		}
+		else if (start.y > MAP_LENGTH - 7 && dir.y == 1) { //남쪽 견제      //따라서 동남쪽 견제
+			_state = NONE_STATE;
+		}
+		else if (start.y < 6 && dir.y == -1) {   //북동쪽 견제
+			_state = NONE_STATE;
+		}
+		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.y * 7] == EMPTY) {
 			_state = _0;
 		}
 		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.y * 7] == WHITE) {
@@ -316,7 +325,17 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 		}
 	}
 	else {
-		if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.y * 7] == EMPTY) {
+		// Check _State
+		if (start.x > MAP_LENGTH - 7 && dir.x == 1) {  //동쪽 견제
+			_state = NONE_STATE;   //그러므로 check_~ function에서 temp < 0 이 되면 나오면 계산 결과 무시
+		}
+		else if (start.y > MAP_LENGTH - 7 && dir.y == 1) { //남쪽 견제      //따라서 동남쪽 견제
+			_state = NONE_STATE;
+		}
+		else if (start.y < 6 && dir.y == -1) {   //북동쪽 견제
+			_state = NONE_STATE;
+		}
+		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.y * 7] == EMPTY) {
 			_state = _0;
 		}
 		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.y * 7] == BLACK) {
@@ -344,7 +363,6 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 			_state = _8;
 		}
 	}
-
 
 	// Check Basic state
 	if (map[start.x + dir.x * 1][start.y + dir.y * 1] == mine) {
@@ -535,10 +553,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
 					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = SIGMA9;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = GAMMA7;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -546,10 +564,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = GAMMA8;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = BETA2;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -562,10 +580,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
 					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = GAMMA9;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = BETA3;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -573,10 +591,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = BETA4;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = ALPHA0;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -604,10 +622,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
 					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = THETA5;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = SIGMA10;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -615,10 +633,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = SIGMA11;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = GAMMA10;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -631,10 +649,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
 					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = SIGMA12;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = GAMMA11;;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -642,10 +660,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = GAMMA12;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = BETA5;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -663,10 +681,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
 					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = SIGMA13;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = GAMMA13;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -674,10 +692,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = GAMMA14;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = BETA6;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -690,10 +708,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
 					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = GAMMA15;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = BETA7;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -701,10 +719,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = BETA8;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = ALPHA1;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -727,10 +745,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
 					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = SIGMA14;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = GAMMA16;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -738,10 +756,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = GAMMA17;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = BETA9;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -754,10 +772,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
 					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = GAMMA18;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = BETA10;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -765,10 +783,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = BETA11;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = ALPHA2;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -786,10 +804,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
 					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = GAMMA19;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = BETA12;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -797,10 +815,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = BETA13;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = ALPHA3;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -813,10 +831,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
 					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = BETA14;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = ALPHA4;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -824,10 +842,10 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					}
 					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
 						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
-
+							basic_state = ALPHA5;
 						}
 						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
-
+							basic_state = EPSILONE;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -853,8 +871,12 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 		basic_state = NONE_STATE;
 	}
 
-
-	return (basic_state * _STATE_MAX) + _state;
+	if (_state > 0 && basic_state > 0) {
+		return (basic_state * _STATE_MAX) + _state;
+	}
+	else {
+		return -1;
+	}
 }
 
 int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location dir_list[]) {
@@ -967,6 +989,10 @@ int check_aw(int state[][MAP_LENGTH][MAP_LENGTH], vector start) {
 	int temp = state[start.dir][start.x][start.y];
 	int i = 0;
 	int return_value = 0;
+	if (temp < 0) {
+		return 0;
+	}
+
 	for (i = 0; i < SIGMA_MAX; i++) {
 		if (temp == (SIGMA0 + i) * _STATE_MAX + _0 || temp == (SIGMA0 + i) * _STATE_MAX + _2) {
 			return_value = 1;
