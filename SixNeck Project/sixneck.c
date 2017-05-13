@@ -347,26 +347,26 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 
 
 	// Check Basic state
-	if (map[start.x + dir.x * 1][start.y + dir.x * 1] == mine) {
-		if (map[start.x + dir.x * 2][start.y + dir.x * 2] == mine) {
-			if (map[start.x + dir.x * 3][start.y + dir.x * 3] == mine) {
-				if (map[start.x + dir.x * 4][start.y + dir.x * 4] == mine) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+	if (map[start.x + dir.x * 1][start.y + dir.y * 1] == mine) {
+		if (map[start.x + dir.x * 2][start.y + dir.y * 2] == mine) {
+			if (map[start.x + dir.x * 3][start.y + dir.y * 3] == mine) {
+				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 							basic_state = W;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 							basic_state = THETA0;
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 							basic_state = THETA1;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 							basic_state = SIGMA0;
 						}
 						else {
@@ -377,23 +377,23 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 						basic_state = NONE_STATE;
 					}
 				}
-				else if (map[start.x + dir.x * 4][start.y + dir.x * 4] == EMPTY) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 							basic_state = THETA2;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 							basic_state = SIGMA1;
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 							basic_state = SIGMA2;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 							basic_state = GAMMA0;
 						}
 						else {
@@ -408,25 +408,25 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					basic_state = NONE_STATE;
 				}
 			}
-			else if (map[start.x + dir.x * 3][start.y + dir.x * 3] == EMPTY) {
-				if (map[start.x + dir.x * 4][start.y + dir.x * 4] == mine) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+			else if (map[start.x + dir.x * 3][start.y + dir.y * 3] == EMPTY) {
+				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 							basic_state = THETA3;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 							basic_state = SIGMA3;
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
+							basic_state = SIGMA4;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
+							basic_state = GAMMA1;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -436,24 +436,24 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 						basic_state = NONE_STATE;
 					}
 				}
-				else if (map[start.x + dir.x * 4][start.y + dir.x * 4] == EMPTY) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
+							basic_state = SIGMA5;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
+							basic_state = GAMMA2;
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
+							basic_state = GAMMA3;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
+							basic_state = BETA0;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -471,26 +471,26 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				basic_state = NONE_STATE;
 			}
 		}
-		else if (map[start.x + dir.x * 2][start.y + dir.x * 2] == EMPTY) {
-			if (map[start.x + dir.x * 3][start.y + dir.x * 3] == mine) {
-				if (map[start.x + dir.x * 4][start.y + dir.x * 4] == mine) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+		else if (map[start.x + dir.x * 2][start.y + dir.y * 2] == EMPTY) {
+			if (map[start.x + dir.x * 3][start.y + dir.y * 3] == mine) {
+				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
+							basic_state = THETA4;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
+							basic_state = SIGMA6;
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
+							basic_state = SIGMA7;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
+							basic_state = GAMMA4;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -500,24 +500,24 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 						basic_state = NONE_STATE;
 					}
 				}
-				else if (map[start.x + dir.x * 4][start.y + dir.x * 4] == EMPTY) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
+							basic_state = SIGMA8;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
+							basic_state = GAMMA5;
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
-
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
+							basic_state = GAMMA6;
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
-
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
+							basic_state = BETA1;
 						}
 						else {
 							basic_state = NONE_STATE;
@@ -531,24 +531,24 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					basic_state = NONE_STATE;
 				}
 			}
-			else if (map[start.x + dir.x * 3][start.y + dir.x * 3] == EMPTY) {
-				if (map[start.x + dir.x * 4][start.y + dir.x * 4] == mine) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+			else if (map[start.x + dir.x * 3][start.y + dir.y * 3] == EMPTY) {
+				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
@@ -559,23 +559,23 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 						basic_state = NONE_STATE;
 					}
 				}
-				else if (map[start.x + dir.x * 4][start.y + dir.x * 4] == EMPTY) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
@@ -598,26 +598,26 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 			basic_state = NONE_STATE;
 		}
 	}
-	else if (map[start.x + dir.x * 1][start.y + dir.x * 1] == EMPTY) {
-		if (map[start.x + dir.x * 2][start.y + dir.x * 2] == mine) {
-			if (map[start.x + dir.x * 3][start.y + dir.x * 3] == mine) {
-				if (map[start.x + dir.x * 4][start.y + dir.x * 4] == mine) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+	else if (map[start.x + dir.x * 1][start.y + dir.y * 1] == EMPTY) {
+		if (map[start.x + dir.x * 2][start.y + dir.y * 2] == mine) {
+			if (map[start.x + dir.x * 3][start.y + dir.y * 3] == mine) {
+				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
@@ -628,23 +628,23 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 						basic_state = NONE_STATE;
 					}
 				}
-				else if (map[start.x + dir.x * 4][start.y + dir.x * 4] == EMPTY) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
@@ -659,24 +659,24 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					basic_state = NONE_STATE;
 				}
 			}
-			else if (map[start.x + dir.x * 3][start.y + dir.x * 3] == EMPTY) {
-				if (map[start.x + dir.x * 4][start.y + dir.x * 4] == mine) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+			else if (map[start.x + dir.x * 3][start.y + dir.y * 3] == EMPTY) {
+				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
@@ -687,23 +687,23 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 						basic_state = NONE_STATE;
 					}
 				}
-				else if (map[start.x + dir.x * 4][start.y + dir.x * 4] == EMPTY) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
@@ -722,25 +722,25 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 				basic_state = NONE_STATE;
 			}
 		}
-		else if (map[start.x + dir.x * 2][start.y + dir.x * 2] == EMPTY) {
-			if (map[start.x + dir.x * 3][start.y + dir.x * 3] == mine) {
-				if (map[start.x + dir.x * 4][start.y + dir.x * 4] == mine) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+		else if (map[start.x + dir.x * 2][start.y + dir.y * 2] == EMPTY) {
+			if (map[start.x + dir.x * 3][start.y + dir.y * 3] == mine) {
+				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
@@ -751,23 +751,23 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 						basic_state = NONE_STATE;
 					}
 				}
-				else if (map[start.x + dir.x * 4][start.y + dir.x * 4] == EMPTY) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
@@ -782,24 +782,24 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 					basic_state = NONE_STATE;
 				}
 			}
-			else if (map[start.x + dir.x * 3][start.y + dir.x * 3] == EMPTY) {
-				if (map[start.x + dir.x * 4][start.y + dir.x * 4] == mine) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+			else if (map[start.x + dir.x * 3][start.y + dir.y * 3] == EMPTY) {
+				if (map[start.x + dir.x * 4][start.y + dir.y * 4] == mine) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
@@ -810,23 +810,23 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 						basic_state = NONE_STATE;
 					}
 				}
-				else if (map[start.x + dir.x * 4][start.y + dir.x * 4] == EMPTY) {
-					if (map[start.x + dir.x * 5][start.y + dir.x * 5] == mine) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+				else if (map[start.x + dir.x * 4][start.y + dir.y * 4] == EMPTY) {
+					if (map[start.x + dir.x * 5][start.y + dir.y * 5] == mine) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
 							basic_state = NONE_STATE;
 						}
 					}
-					else if (map[start.x + dir.x * 5][start.y + dir.x * 5] == EMPTY) {
-						if (map[start.x + dir.x * 6][start.y + dir.x * 6] == mine) {
+					else if (map[start.x + dir.x * 5][start.y + dir.y * 5] == EMPTY) {
+						if (map[start.x + dir.x * 6][start.y + dir.y * 6] == mine) {
 
 						}
-						else if (map[start.x + dir.x * 6][start.y + dir.x * 6] == EMPTY) {
+						else if (map[start.x + dir.x * 6][start.y + dir.y * 6] == EMPTY) {
 
 						}
 						else {
