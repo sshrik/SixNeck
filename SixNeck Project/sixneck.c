@@ -212,6 +212,7 @@ mw set : aw set 이 연속해서 3개 붙어 있을 때.
 aw set : { δ, θ set } X { _0, _2, _6, _8 }
 */
 
+#define GENERATION_MAX 30
 
 typedef struct {
 	short x;
@@ -244,6 +245,11 @@ void array3_initializer(int arr[], int length1, int length2, int length3, int to
 void location_copy(location *src, location *dst);
 void vector_copy(vector *src, vector *dst);
 void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH]);
+
+void select_parent(int parent[][STATE_LENGTH], int selected[][STATE_LENGTH], int fitness[]);
+void set_fitness(int parent[][STATE_LENGTH], int fitness[]);
+void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENGTH]);
+void generate_mutation(int generation[][STATE_LENGTH], int fitness[]);
 
 int main() {
 	int priority[STATE_LENGTH];
@@ -1305,4 +1311,20 @@ void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH] ) {
 			temp_map[i][j] = map[i][j];
 		}
 	}
+}
+
+void select_parent(int parent[][STATE_LENGTH], int selected[][STATE_LENGTH], int fitness[]) {
+
+}
+
+void set_fitness(int parent[][STATE_LENGTH], int fitness[]) {
+
+}
+
+void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENGTH]) {
+
+}
+
+void generate_mutation(int generation[][STATE_LENGTH], int fitness[]) {
+
 }
