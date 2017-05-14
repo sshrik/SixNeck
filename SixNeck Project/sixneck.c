@@ -239,7 +239,7 @@ unsigned long long int get_state_priority(int state[][MAP_LENGTH][MAP_LENGTH], i
 int who_win(int map[][MAP_LENGTH], location where_put);
 int dir_row_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
 int dir_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
-location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine, int threshold);
+location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine);
 int add_stone(location where, int map[][MAP_LENGTH], int mine);
 
 // Utilization Functions
@@ -1159,11 +1159,10 @@ int dir_win(int map[][MAP_LENGTH], location start, location dir, int mine) {
 	}
 }
 
-location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine, int threshold) {
+location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine) {
 	// Find candidate location and save it to candidate.
 	// if no more candidate is recommended, save (-1, -1).
 	// Check every area of map, do it, and check priority is increase or decrease.
-	// if increase, if the value is larger then threshold, added to candidate list.
 
 	// Decied where to put stone from candidate location list 'candidate'.
 	// ms, es, candidate, state_priority value with get_state_priority.
@@ -1171,8 +1170,10 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 	// Calculate where to put.
 
 	location return_value, to;
-	location candidate[CANDIDATE_MAX];
-	unsigned long long int enemy_priority[CANDIDATE_MAX], mine_priority[CANDIDATE_MAX];
+	location candidate[400];
+	unsigned long long int enemy_priority[400], mine_priority[400];
+	// case of all area is candidate.
+	// Find all case can do.
 	unsigned long long int now_mine = get_state_priority(ms, priority);
 	unsigned long long int now_enemy = get_state_priority(es, priority);
 	unsigned long long int temp_mine, temp_enemy;
@@ -1195,25 +1196,19 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 					temp_enemy = get_state_priority(temp_es, priority);
 					// Caculate changed priority or state.
 					if (now_mine < temp_mine) {
-						// If Changed value is larger than threshold, it wiil be candidate.
-						if (temp_mine - now_mine > threshold) {
-							location_copy(&to, &candidate[candidate_number]);
-							mine_priority[candidate_number] = temp_mine;
-							enemy_priority[candidate_number] = temp_enemy;
-							// Save it to existing array.
-							candidate_number++;
-						}
+						location_copy(&to, &candidate[candidate_number]);
+						mine_priority[candidate_number] = temp_mine;
+						enemy_priority[candidate_number] = temp_enemy;
+						// Save it to existing array.
+						candidate_number++;
 					}
 
 					if (now_enemy < temp_enemy) {
-						// If Changed value is larger than threshold, it wiil be candidate.
-						if (temp_enemy - now_enemy > threshold) {
-							location_copy(&to, &candidate[candidate_number]);
-							mine_priority[candidate_number] = temp_mine;
-							enemy_priority[candidate_number] = temp_enemy;
-							// Save it to existing array.
-							candidate_number++;
-						}
+						location_copy(&to, &candidate[candidate_number]);
+						mine_priority[candidate_number] = temp_mine;
+						enemy_priority[candidate_number] = temp_enemy;
+						// Save it to existing array.
+						candidate_number++;
 					}
 
 					map_copy(temp_map, map);
@@ -1238,10 +1233,13 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 	}
 	if (mine_priority[temp_my_index] - now_mine >= mine_priority[temp_enemy_index] - now_enemy) {
 		return_value = candidate[temp_my_index];
+		// If attack priority is higher then shield priorty..
 	}
 	else {
 		return_value = candidate[temp_enemy_index];
+		// If attack priority is higher then shield priorty..
 	}
+
 	return return_value;
 }
 
