@@ -190,12 +190,12 @@ State is defigned like DELTA5 * _5 or GAMMA7 * _2
 θ0	○○○○○◎	θ1	○○○○◎○	θ2	○○○◎○○	θ3	○○◎○○○	θ4	○◎○○○○
 θ5	◎○○○○○
 */
-#define THETA0 43
-#define THETA1 44
-#define THETA2 45
-#define THETA3 46
-#define THETA4 47
-#define THETA5 48
+#define THETA0 57
+#define THETA1 58
+#define THETA2 59
+#define THETA3 60
+#define THETA4 61
+#define THETA5 62
 #define THETA_MAX 6
 /*
 W	6개의 내 돌 ( ○ ) 존재 = { W }
@@ -205,8 +205,9 @@ W	○○○○○○
 
 //State is defigned like DELTA5 * _STATE_MAX + _5 or GAMMA7 * _2
 
-#define STATE_LENGTH 451
+#define STATE_LENGTH 558
 // 50 * 9 + 1 개
+// -1 ~ 556
 
 /*	mw = must win, aw = amado win 을 의미한다.
 mw set : aw set 이 연속해서 3개 붙어 있을 때.
@@ -461,13 +462,16 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 	}
 	else {
 		// Check _State
-		if (start.x > MAP_LENGTH - 7 && dir.x == 1) {  //동쪽 견제
-			_state = NONE_STATE;   //그러므로 check_~ function에서 temp < 0 이 되면 나오면 계산 결과 무시
-		}
-		else if (start.y > MAP_LENGTH - 7 && dir.y == 1) { //남쪽 견제      //따라서 동남쪽 견제
+		if ((start.x > MAP_LENGTH - 7) && (dir.x == 0 && dir.y == 1)) {  //EAST 견제
 			_state = NONE_STATE;
 		}
-		else if (start.y < 6 && dir.y == -1) {   //북동쪽 견제
+		else if ((start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 0)) { //SOUTH 견제
+			_state = NONE_STATE;
+		}
+		else if ((start.x < 7 || start.y > MAP_LENGTH - 7) && (dir.x == -1 && dir.y == 1)) { //NORTH_EAST 견제
+			_state = NONE_STATE;
+		}
+		else if ((start.x > MAP_LENGTH - 7 || start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 1)) {   //SOUTH_EAST 견제
 			_state = NONE_STATE;
 		}
 		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.y * 7] == EMPTY) {
@@ -1006,7 +1010,7 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 		basic_state = NONE_STATE;
 	}
 
-	if (_state > 0 || basic_state > 0) {
+	if (_state >= 0) {
 		return (basic_state * _STATE_MAX) + _state;
 	}
 	else {
@@ -1268,7 +1272,6 @@ location* find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MA
 					// Save it to existing array.
 					candidate_number++;
 				}
-
 				map_copy(temp_map, map);
 				array3_initializer(temp_ms, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
 				array3_initializer(temp_es, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
@@ -1296,7 +1299,6 @@ location* find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MA
 			}
 		}
 	}
-
 	return &candidate_real[real_rand(0, candidate_number_real)];
 	// return random value of 0 ~ candidate's number.
 	// this can make sure if highest candidates are many, we can choose randomly location.
@@ -1328,6 +1330,9 @@ location* ai_turn(int map[][MAP_LENGTH], int priority[], int remain_turn, int mi
 	location* p_last = (location*)malloc(sizeof(location));
 
 	search_state(ms, es, map, mine);
+	p_last->x = -1;
+	p_last->y = -1;
+	printf("%d %d is object.\n", p_last->x, p_last->y);
 
 	aw_number = aw_location(ms, m_aw_where);
 
@@ -1336,6 +1341,8 @@ location* ai_turn(int map[][MAP_LENGTH], int priority[], int remain_turn, int mi
 			// if aw is exist, then we can win.
 			// doing job with remain_turn.
 			p_last = aw_doing(ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y], m_aw_where[i], remain_turn);
+
+			printf("%d %d is object.\n", p_last->x, p_last->y);
 			if (p_last->x != -1) {
 				break;
 			}
@@ -1353,6 +1360,8 @@ location* ai_turn(int map[][MAP_LENGTH], int priority[], int remain_turn, int mi
 				// if aw is exist, then we can lose, so defense it.
 				// doing job with remain_turn.
 				p_last = aw_doing(ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y], m_aw_where[i], remain_turn);
+
+				printf("%d %d is object.\n", p_last->x, p_last->y);
 				if (p_last->x != -1) {
 					break;
 				}
@@ -1366,8 +1375,10 @@ location* ai_turn(int map[][MAP_LENGTH], int priority[], int remain_turn, int mi
 	else {
 		// if i can't finish and enemy can't finish.
 		p_last = find_candidate_location(map, ms, es, priority, mine);
+		printf("%d %d is object.\n", p_last->x, p_last->y);
 	}
 
+	printf("%d %d is object.\n", p_last->x, p_last->y);
 	return p_last;
 }
 
