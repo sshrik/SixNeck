@@ -1,0 +1,8 @@
+﻿빌드 시작: 2017-05-14 오후 12:14:58
+     1>2 노드의 "C:\Users\caucse\Desktop\SixNeck\SixNeck Project\SixNeck Project.vcxproj" 프로젝트(Build 대상)입니다.
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.Cpp.Platform.targets(64,5): error MSB8020: The build tools for v140 (Platform Toolset = 'v140') cannot be found. To build using the v140 build tools, please install v140 build tools.  Alternatively, you may upgrade to the current Visual Studio tools by selecting the Project menu or right-click the solution, and then selecting "Upgrade Solution...".
+     1>"C:\Users\caucse\Desktop\SixNeck\SixNeck Project\SixNeck Project.vcxproj" 프로젝트를 빌드했습니다(Build 대상). - 실패
+
+빌드하지 못했습니다.
+
+경과 시간: 00:00:00.26

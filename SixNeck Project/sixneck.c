@@ -258,6 +258,7 @@ void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENG
 void cross_product(int p0[], int p1[], int gen[], int cross[]);
 void generate_mutation(int generation[][STATE_LENGTH], int fitness[]);
 void suffle_generation(int generation[][STATE_LENGTH]);
+int real_rand(int from, int to);
 
 int main() {
 	int priority[STATE_LENGTH];
@@ -1220,6 +1221,14 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 		}
 	}
 
+	/*
+		mine_priority[i] 중 가장 큰 것, 혹은 큰 것들을 찾는다.
+		enemy_priority[i] 중 가장 큰 것, 혹은 큰 것들을 찾는다.
+	*/
+
+
+
+
 	//Decide where to put with calculated data.
 	temp_my_index = 0;
 	temp_enemy_index = 0;
@@ -1468,5 +1477,9 @@ void generate_mutation(int generation[][STATE_LENGTH], int fitness[]) {
 void suffle_generation(int generation[][STATE_LENGTH]) {
 	// generation is generated with in order of parents.
 	// so suffle is needed.
+
+}
+
+int real_rand(int from, int to)	{
 
 }
