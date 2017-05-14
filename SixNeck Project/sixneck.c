@@ -234,8 +234,6 @@ typedef struct {
 // AI Functions
 void search_state(int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int map[][MAP_LENGTH], int mine);
 int get_state(int map[][MAP_LENGTH], int mine, vector start);
-int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location dri[]);
-int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir);
 int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]);
 int check_aw(int state[][MAP_LENGTH][MAP_LENGTH], vector start);
 void set_prioirity(int priority[], int to[]);
@@ -246,7 +244,7 @@ int dir_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
 int is_draw(int map[][MAP_LENGTH]);
 location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine);
 int add_stone(location where, int map[][MAP_LENGTH], int mine);
-location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int remain_turn, int mine);
+location ai_turn(int map[][MAP_LENGTH], int priority[], int remain_turn, int mine);
 int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]);
 location aw_doing(int state, vector start_location, int remain_turn);
 
@@ -261,12 +259,11 @@ void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH]);
 
 // Gen Algorithm functions
 void select_parent(int parent[][STATE_LENGTH], int selected[][STATE_LENGTH], int fitness[]);
-void set_fitness(int parent[][STATE_LENGTH], int fitness[]);
+void set_fitness(int generation[][STATE_LENGTH], int given_set[], int fitness[]);
 void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENGTH]);
 void cross_product(int p0[], int p1[], int gen[], int cross[]);
 void generate_cross_point(int cross[]);
 void generate_mutation(int generation[][STATE_LENGTH], int fitness[]);
-void suffle_generation(int generation[][STATE_LENGTH]);
 int real_rand(int from, int to);
 
 int main() {
@@ -311,16 +308,16 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 	int _state = -1;
 	int basic_state = NONE_STATE;
 	if (start.dir == EAST) {
-		dir.x = 1;
-		dir.y = 0;
-	}
-	else if (start.dir == NORTH_EAST) {
-		dir.x = 1;
-		dir.y = -1;
-	}
-	else if (start.dir == SOUTH) {
 		dir.x = 0;
 		dir.y = 1;
+	}
+	else if (start.dir == NORTH_EAST) {
+		dir.x = -1;
+		dir.y = 1;
+	}
+	else if (start.dir == SOUTH) {
+		dir.x = 1;
+		dir.y = 0;
 	}
 	else if (start.dir == SOUTH_EAST) {
 		dir.x = 1;
@@ -328,13 +325,16 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 	}
 	if (mine == WHITE) {
 		// Check _State
-		if (start.x > MAP_LENGTH - 7 && dir.x == 1) {  //동쪽 견제
-			_state = NONE_STATE;   //그러므로 check_~ function에서 temp < 0 이 되면 나오면 계산 결과 무시
-		}
-		else if (start.y > MAP_LENGTH - 7 && dir.y == 1) { //남쪽 견제      //따라서 동남쪽 견제
+		if ((start.x > MAP_LENGTH - 7) && (dir.x == 0 && dir.y == 1)) {  //EAST 견제
 			_state = NONE_STATE;
 		}
-		else if (start.y < 6 && dir.y == -1) {   //북동쪽 견제
+		else if ((start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 0)) { //SOUTH 견제
+			_state = NONE_STATE;
+		}
+		else if ((start.x < 7 || start.y > MAP_LENGTH - 7) && (dir.x == -1 && dir.y == 1)) { //NORTH_EAST 견제
+			_state = NONE_STATE;
+		}
+		else if ((start.x > MAP_LENGTH - 7 || start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 1)) {   //SOUTH_EAST 견제
 			_state = NONE_STATE;
 		}
 		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.y * 7] == EMPTY) {
@@ -920,81 +920,6 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 	}
 }
 
-int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location dir_list[]) {
-	// Find all mw location in 'state' and put to 'where'. 'dir' is the direction of 'where'.
-	// And return number of mw number.
-	int i, j, k, d;
-	int vector_num = 0;
-	vector temp;
-	location dir;
-
-	for (k = 0; k < DIR_MAX; k++) {
-		temp.dir = k;	// Set dir to k.
-						// We already defined NORTH_EAST to 0 ... etc.
-		for (i = 0; i < MAP_LENGTH; i++) {
-			temp.x = i;	// Set x to i.
-			for (j = 0; j < MAP_LENGTH; j++) {
-				temp.y = j;	// Set y to i.
-				for (d = 0; d < DIR_MAX; d++) {
-					// Set dir where to check.
-					if (d == EAST) {
-						dir.x = 1;
-						dir.y = 0;
-					}
-					else if (d == NORTH_EAST) {
-						dir.x = 1;
-						dir.y = -1;
-					}
-					else if (d == SOUTH) {
-						dir.x = 0;
-						dir.y = 1;
-					}
-					else if (d == SOUTH_EAST) {
-						dir.x = 1;
-						dir.y = 1;
-					}
-
-					if (check_mw(state, temp, dir) == 1) {
-						// If mw from temp is right, add to list.
-						vector_copy(&where[vector_num], &temp);
-						location_copy(&dir_list[vector_num], &dir);
-						vector_num++;
-					}
-				}
-			}
-		}
-	}
-
-	return vector_num;
-}
-
-int check_mw(int state[][MAP_LENGTH][MAP_LENGTH], vector start, location dir) {
-	//Check from state[start.dir][start.x][start.y] does it is mw.
-	// Because mw need 3 aw, so location dir are needed.
-	//If right, return 1. Else return 0;
-	/*	mw = must win, aw = amado win 을 의미한다.
-	mw set : aw set 이 연속해서 3개 붙어 있을 때.
-	*/
-	int i;
-	vector temp;
-	vector_copy(&temp, &start);
-	for (i = 0; i < 3; i++) {
-		if (check_aw(state, temp) == 1) {	// To check 3 aw in case.
-			temp.x += dir.x;
-			temp.y += dir.y;
-		}
-		else {
-			break;
-		}
-	}
-	if (i != 3) {
-		return 0;
-	}
-	else {
-		return 1;
-	}
-}
-
 int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]) {
 	// Find all aw location in 'state' and put to 'where'.
 	// And return number of aw number.
@@ -1302,7 +1227,7 @@ int add_stone(location where, int map[][MAP_LENGTH], int mine) {
 	}
 }
 
-location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int remain_turn, int mine) {
+location ai_turn(int map[][MAP_LENGTH], int priority[], int remain_turn, int mine) {
 	// real ai part.
 	// AI do his job with given map.
 	// win when can win, defense when can lose.
@@ -1319,24 +1244,43 @@ location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int r
 	aw_number = aw_location(ms, m_aw_where);
 	mw_number = mw_location(ms, m_mw_where, m_mw_dir);
 
-	if (mw_number > 0) {
-
+	if (aw_number > 0) {
+		for (i = 0; i < aw_number; i++) {
+			// if aw is exist, then we can win.
+			// doing job with remain_turn.
+			return_value = aw_doing(ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y], m_aw_where[i], remain_turn);
+			if (return_value.x != -1) {
+				break;
+			}
+		}
 	}
-	else if (aw_number > 0) {
-		if (remain_turn == 1) {
+	if (return_value.x != -1) {
+		// If aw is exist and doing finishing...
+		return return_value;
+	}
+	else {
+		// If aw is exist but can't finish...
+		aw_number = aw_location(es, e_aw_where);
+		mw_number = mw_location(es, e_mw_where, e_mw_dir);
+		if (aw_number > 0) {
 			for (i = 0; i < aw_number; i++) {
-				if (ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y] >= (SIGMA0 * _STATE_MAX + _0) && ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y] < (THETA0 * _STATE_MAX + _0)) {
-					// if state is at SIGMA and remain turn is 1...
-					return_value.x = -1;
-					return_value.y = -1;
+				// if aw is exist, then we can lose, so defense it.
+				// doing job with remain_turn.
+				return_value = aw_doing(ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y], m_aw_where[i], remain_turn);
+				if (return_value.x != -1) {
+					break;
 				}
 			}
 		}
 	}
-
-	aw_number = aw_location(es, e_aw_where);
-	mw_number = mw_location(es, e_mw_where, e_mw_dir);
-
+	if (return_value.x != -1) {
+		// If aw is exist and can be finishing...
+		return return_value;
+	}
+	else {
+		// if i can't finish and enemy can't finish.
+		return_value = find_candidate_location(map, ms, es, priority, mine);
+	}
 
 	return return_value;
 }
@@ -1352,7 +1296,7 @@ int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]) {
 	last_put.x = -1;
 	last_put.y = -1;
 
-	last_put = ai_turn(map, p0, last_put, 1, turn);
+	last_put = ai_turn(map, p0, 1, turn);
 	// first turn.
 
 	while (1) {
@@ -1367,7 +1311,7 @@ int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]) {
 			if (turn == BLACK) {
 				if (win == -1) {
 					// if not win, do ai.
-					last_put = ai_turn(map, p1, last_put, remain_turn, BLACK);
+					last_put = ai_turn(map, p1, remain_turn, BLACK);
 				}
 				else if (win == BLACK) {
 					// if win, return.
@@ -1389,7 +1333,7 @@ int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]) {
 			else {
 				if (win == -1) {
 					// if not win, do ai.
-					last_put = ai_turn(map, p0, last_put, remain_turn, WHITE);
+					last_put = ai_turn(map, p0, remain_turn, WHITE);
 				}
 				else if (win == WHITE) {
 					// if win, return.
@@ -1412,24 +1356,300 @@ int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]) {
 	}
 }
 
-int can_win_immidiate() {
-
-}
-
-location mw_doing() {
-
-}
-
 location aw_doing(int state, vector start_location, int remain_turn) {
 	// at remain_turn is 2, SIGMA can win and at remain_turn is 1, THETA can win.
 	// return where to put to win at that time.
 	location return_value;
+	return_value.x = -1;
+	return_value.y = -1;
 
 	if (remain_turn == 2) {
 		if (state >= (SIGMA0 * _STATE_MAX + _0) && state < (THETA0 * _STATE_MAX + _0)) {
 			// if state is at SIGMA and remain turn is 2...
 			if (state == SIGMA0  * _STATE_MAX + _0 || state == SIGMA0  * _STATE_MAX + _2 || state == SIGMA0  * _STATE_MAX + _6 || state == SIGMA0  * _STATE_MAX + _8) {
-
+				//δ0	○○○○◎◎
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 5;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y + 5;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y - 5;
+				}
+			}
+			else if (state == SIGMA1  * _STATE_MAX + _0 || state == SIGMA1  * _STATE_MAX + _2 || state == SIGMA1  * _STATE_MAX + _6 || state == SIGMA1  * _STATE_MAX + _8) {
+				//δ1	○○○◎○◎
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y - 4;
+				}
+			}
+			else if (state == SIGMA2  * _STATE_MAX + _0 || state == SIGMA2  * _STATE_MAX + _2 || state == SIGMA2  * _STATE_MAX + _6 || state == SIGMA2  * _STATE_MAX + _8) {
+				//δ2	○○○◎◎○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y - 4;
+				}
+			}
+			else if (state == SIGMA3  * _STATE_MAX + _0 || state == SIGMA3  * _STATE_MAX + _2 || state == SIGMA3  * _STATE_MAX + _6 || state == SIGMA3  * _STATE_MAX + _8) {
+				//δ3	○○◎○○◎
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 3;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y + 3;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y - 3;
+				}
+			}
+			else if (state == SIGMA4  * _STATE_MAX + _0 || state == SIGMA4  * _STATE_MAX + _2 || state == SIGMA4  * _STATE_MAX + _6 || state == SIGMA4  * _STATE_MAX + _8) {
+				//δ4	○○◎○◎○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 3;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y + 3;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y - 3;
+				}
+			}
+			else if (state == SIGMA5  * _STATE_MAX + _0 || state == SIGMA5  * _STATE_MAX + _2 || state == SIGMA5  * _STATE_MAX + _6 || state == SIGMA5  * _STATE_MAX + _8) {
+				//δ5	○○◎◎○○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y - 4;
+				}
+			}
+			else if (state == SIGMA6  * _STATE_MAX + _0 || state == SIGMA6  * _STATE_MAX + _2 || state == SIGMA6  * _STATE_MAX + _6 || state == SIGMA6  * _STATE_MAX + _8) {
+				//δ6	○◎○○○◎
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 2;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 6;
+					return_value.y = start_location.y + 2;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 2;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 2;
+					return_value.y = start_location.y - 2;
+				}
+			}
+			else if (state == SIGMA7  * _STATE_MAX + _0 || state == SIGMA7  * _STATE_MAX + _2 || state == SIGMA7  * _STATE_MAX + _6 || state == SIGMA7  * _STATE_MAX + _8) {
+				//δ7	○◎○○◎○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 5;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y + 5;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y - 5;
+				}
+			}
+			else if (state == SIGMA8  * _STATE_MAX + _0 || state == SIGMA8  * _STATE_MAX + _2 || state == SIGMA8  * _STATE_MAX + _6 || state == SIGMA8  * _STATE_MAX + _8) {
+				//δ8	○◎○◎○○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y - 4;
+				}
+			}
+			else if (state == SIGMA9  * _STATE_MAX + _0 || state == SIGMA9  * _STATE_MAX + _2 || state == SIGMA9  * _STATE_MAX + _6 || state == SIGMA9  * _STATE_MAX + _8) {
+				//δ9	○◎◎○○○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 3;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y + 3;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y - 3;
+				}
+			}
+			else if (state == SIGMA10  * _STATE_MAX + _0 || state == SIGMA10  * _STATE_MAX + _2 || state == SIGMA10  * _STATE_MAX + _6 || state == SIGMA10  * _STATE_MAX + _8) {
+				//δ10	◎○○○○◎
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 6;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 6;
+					return_value.y = start_location.y + 6;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 6;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 6;
+					return_value.y = start_location.y - 6;
+				}
+			}
+			else if (state == SIGMA11  * _STATE_MAX + _0 || state == SIGMA11  * _STATE_MAX + _2 || state == SIGMA11  * _STATE_MAX + _6 || state == SIGMA11  * _STATE_MAX + _8) {
+				//δ11	◎○○○◎○	
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 5;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y + 5;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y - 5;
+				}
+			}
+			else if (state == SIGMA12  * _STATE_MAX + _0 || state == SIGMA12  * _STATE_MAX + _2 || state == SIGMA12  * _STATE_MAX + _6 || state == SIGMA12  * _STATE_MAX + _8) {
+				//δ12	◎○○◎○○	
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y - 4;
+				}
+			}
+			else if (state == SIGMA13  * _STATE_MAX + _0 || state == SIGMA13  * _STATE_MAX + _2 || state == SIGMA13  * _STATE_MAX + _6 || state == SIGMA13  * _STATE_MAX + _8) {
+				//δ13	◎○◎○○○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 3;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y + 3;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 1;
+					return_value.y = start_location.y - 1;
+				}
+			}
+			else if (state == SIGMA14  * _STATE_MAX + _0 || state == SIGMA14  * _STATE_MAX + _2 || state == SIGMA14  * _STATE_MAX + _6 || state == SIGMA14  * _STATE_MAX + _8) {
+				//δ14	◎◎○○○○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 2;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 2;
+					return_value.y = start_location.y + 2;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 2;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 2;
+					return_value.y = start_location.y - 2;
+				}
 			}
 		}
 	}
