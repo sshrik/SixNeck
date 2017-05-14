@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
+#include<Windows.h>
+
 
 /*
 [목표] : 6칸을 만들어 승리 / 상대의 6칸을 방해
@@ -266,10 +268,97 @@ void generate_cross_point(int cross[]);
 void generate_mutation(int generation[][STATE_LENGTH], int fitness[]);
 int real_rand(int from, int to);
 
+
+void gotoxy(int x, int y) {
+	COORD Pos;
+	Pos.X = x;
+	Pos.Y = y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Pos);
+}
+
+void mapping(int map[MAP_LENGTH][MAP_LENGTH]) {
+	int i = 0;
+	int j = 0;
+	printf("┌┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┐\n");
+	for (j = 0; j < MAP_LENGTH; j++) {
+		printf("├");
+		for (i = 0; i < MAP_LENGTH; i++) {
+			if (map[j][i] == 0) {
+				printf("┼");
+			}
+			else if (map[j][i] == 1) {
+				printf("○");
+			}
+			else if (map[j][i] == 2) {
+				printf("●");
+			}
+		}
+		printf("┤\n");
+
+	}
+
+	printf("└┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┘\n");
+
+}
+void msMapping(int ms[][MAP_LENGTH][MAP_LENGTH]) {
+	int i = 0;
+	int j = 0;
+	for (j = 0; j < MAP_LENGTH; j++) {
+		for (i = 0; i < MAP_LENGTH; i++) {
+			printf("%d	", ms[1][j][i]);
+		}
+		printf("\n");
+	}
+}
+
 int main() {
-	srand((unsigned)time(NULL));
+	int map[MAP_LENGTH][MAP_LENGTH] = { 0, };
+	int ms[4][MAP_LENGTH][MAP_LENGTH] = { 0, };
+	int es[4][MAP_LENGTH][MAP_LENGTH] = { 0, };
+	mapping(map);
+	msMapping(ms);
+	//srand((unsigned)time(NULL));
 
 
+	int x = 2;
+	int y = 1;
+	int button = 0;
+	int turn = 1;
+	gotoxy(x, y);
+
+	while (1) {
+		button = _getch();
+		if (button == 32) {
+			if (turn == 1) {
+				map[y - 1][x / 2 - 1] = 1;
+				turn++;
+			}
+			else {
+				map[y - 1][x / 2 - 1] = 2;
+				turn--;
+			}
+			system("cls");
+			search_state(ms, es, map, 1);
+			mapping(map);
+			msMapping(ms);
+
+		}
+		switch (button) {
+		case 77:
+			x += 2;
+			break;
+		case 80:
+			y += 1;
+			break;
+		case 72:
+			y -= 1;
+			break;
+		case 75:
+			x -= 2;
+			break;
+		}
+		gotoxy(x, y);
+	}
 	return 0;
 }
 
