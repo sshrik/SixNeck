@@ -248,6 +248,7 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 int add_stone(location where, int map[][MAP_LENGTH], int mine);
 location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put);
 int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]);
+location aw_doing(int state, vector start_location, int remain_turn);
 
 // Utilization Functions
 void initialize_map(int map[][MAP_LENGTH]);
@@ -1306,8 +1307,38 @@ location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int r
 	// AI do his job with given map.
 	// win when can win, defense when can lose.
 	// else, attack or defense with given candidate.
+	int ms[DIR_MAX][MAP_LENGTH][MAP_LENGTH], es[DIR_MAX][MAP_LENGTH][MAP_LENGTH];
+	int aw_number, mw_number, i, j;
+	vector m_aw_where[MAP_LENGTH * MAP_LENGTH], m_mw_where[MAP_LENGTH * MAP_LENGTH];
+	vector e_aw_where[MAP_LENGTH * MAP_LENGTH], e_mw_where[MAP_LENGTH * MAP_LENGTH];
+	location m_mw_dir[MAP_LENGTH * MAP_LENGTH], e_mw_dir[MAP_LENGTH * MAP_LENGTH];
+	location return_value;
+
+	search_state(ms, es, map, mine);
+
+	aw_number = aw_location(ms, m_aw_where);
+	mw_number = mw_location(ms, m_mw_where, m_mw_dir);
+
+	if (mw_number > 0)	{
+
+	}
+	else if (aw_number > 0)	{
+		if (remain_turn == 1)	{
+			for (i = 0; i < aw_number; i++)	{
+				if (ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y] >= (SIGMA0 * _STATE_MAX + _0) && ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y] < (THETA0 * _STATE_MAX + _0))	{
+					// if state is at SIGMA and remain turn is 1...
+					return_value.x = -1;
+					return_value.y = -1;
+				}
+			}
+		}
+	}
+
+	aw_number = aw_location(es, e_aw_where);
+	mw_number = mw_location(es, e_mw_where, e_mw_dir);
 
 
+	return return_value;
 }
 
 int ai_game(int map[][MAP_LENGTH], int p0[], int p1[])	{
@@ -1379,6 +1410,67 @@ int ai_game(int map[][MAP_LENGTH], int p0[], int p1[])	{
 			}
 		}
 	}
+}
+
+int can_win_immidiate()	{
+
+}
+
+location mw_doing()	{
+
+}
+
+location aw_doing(int state, vector start_location, int remain_turn)	{
+	// at remain_turn is 2, SIGMA can win and at remain_turn is 1, THETA can win.
+	// return where to put to win at that time.
+	location return_value;
+
+	if (remain_turn == 2)	{
+		if (state >= (SIGMA0 * _STATE_MAX + _0) && state < (THETA0 * _STATE_MAX + _0))	{
+			// if state is at SIGMA and remain turn is 2...
+			/*
+			θ	5개의 내 돌 ( ○ ) 존재 = { θ0, θ1, θ2 ... θ5 }
+			θ0	○○○○○◎	θ1	○○○○◎○	θ2	○○○◎○○	θ3	○○◎○○○	θ4	○◎○○○○
+			θ5	◎○○○○○
+			*/
+		}
+	}
+	else {
+		if (state < (SIGMA0 * _STATE_MAX + _0) || state >= (THETA0 * _STATE_MAX + _0)) {
+			// if state is at THETA and remain turn is 1...
+			if (state == THETA0 * _STATE_MAX + _0 || state == THETA0 * _STATE_MAX + _2 || state == THETA0 * _STATE_MAX + _6 || state == THETA0 * _STATE_MAX + _8)	{
+				if (start_location.dir == SOUTH)	{ // increase ( 0, 1 )
+
+				}
+				else if (start_location.dir == SOUTH_EAST)	{ // increase ( 1, 1 )
+
+				}
+				else if (start_location.dir == EAST)	{ // increase ( 1 , 0 )
+
+				}
+				else {	// increase ( 1, -1 )
+
+				}
+			}
+			else if (state == THETA1 * _STATE_MAX + _0 || state == THETA1 * _STATE_MAX + _2 || state == THETA1 * _STATE_MAX + _6 || state == THETA1 * _STATE_MAX + _8)	{
+
+			}
+			else if (state == THETA2 * _STATE_MAX + _0 || state == THETA2 * _STATE_MAX + _2 || state == THETA2 * _STATE_MAX + _6 || state == THETA2 * _STATE_MAX + _8)	{
+
+			}
+			else if (state == THETA3 * _STATE_MAX + _0 || state == THETA3 * _STATE_MAX + _2 || state == THETA3 * _STATE_MAX + _6 || state == THETA3 * _STATE_MAX + _8)	{
+
+			}
+			else if (state == THETA4 * _STATE_MAX + _0 || state == THETA4 * _STATE_MAX + _2 || state == THETA4 * _STATE_MAX + _6 || state == THETA4 * _STATE_MAX + _8)	{
+
+			}
+			else if (state == THETA5 * _STATE_MAX + _0 || state == THETA5 * _STATE_MAX + _2 || state == THETA5 * _STATE_MAX + _6 || state == THETA5 * _STATE_MAX + _8)	{
+
+			}
+		}
+	}
+
+	return return_value;
 }
 
 void initialize_map(int map[][MAP_LENGTH]) {
@@ -1498,14 +1590,30 @@ void set_fitness(int generation[][STATE_LENGTH], int given_set[], int fitness[])
 	for (i = 0; i < GENERATION_MAX; i++)	{
 		while (play < GAME_MAX)	{
 			win = ai_game(map, &generation[i], given_set);
+			// game processed generation[i] first.
+
 			if (win == 0)	{
 				//generation[i]'s win.
 				win_number++;
 				play++;
 			}
+
 			initialize_map(map);
+
+			win = ai_game(map, given_set, &generation[i]);
+			// game processed given_set first.
+
+			if (win == 0)	{
+				//generation[i]'s win.
+				win_number++;
+				play++;
+			}
+
+			initialize_map(map);
+			// initialize map for reusing.
 		}
 		fitness[i] = (int)(FITNESS_MAX / GAME_MAX) * win_number;
+		//calculate fitness with win number.
 	}
 
 }
@@ -1611,8 +1719,7 @@ void generate_mutation(int generation[][STATE_LENGTH], int fitness[]) {
 	// Mutation appear at [i] change into random number.
 	// The probability of mutation will be low if parent's fitness average is low.
 	// fitess[i] is over 0, below FITNESS_MAX, so if real_rand(0, FITNESS_MAX) 's output is over fitness[i], then mutate.
-	// if else, don't mutate.
-	// for all part of generic.
+	// if else, don't mutate, for all part of generic.
 
 	int i, j, random_value;
 
@@ -1623,7 +1730,6 @@ void generate_mutation(int generation[][STATE_LENGTH], int fitness[]) {
 			}
 		}
 	}
-
 }
 
 int real_rand(int from, int to)	{
