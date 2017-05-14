@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
+#include<windows.h>
 
 /*
 [¸ñÇ¥] : 6Ä­À» ¸¸µé¾î ½Â¸® / »ó´ëÀÇ 6Ä­À» ¹æÇØ
@@ -242,11 +243,11 @@ int who_win(int map[][MAP_LENGTH], location where_put);
 int dir_row_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
 int dir_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
 int is_draw(int map[][MAP_LENGTH]);
-location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine);
+location* find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine);
 int add_stone(location where, int map[][MAP_LENGTH], int mine);
-location ai_turn(int map[][MAP_LENGTH], int priority[], int remain_turn, int mine);
+location* ai_turn(int map[][MAP_LENGTH], int priority[], int remain_turn, int mine);
 int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]);
-location aw_doing(int state, vector start_location, int remain_turn);
+location* aw_doing(int state, vector start_location, int remain_turn);
 
 // Utilization Functions
 void initialize_map(int map[][MAP_LENGTH]);
@@ -256,6 +257,7 @@ void array3_initializer(int arr[], int length1, int length2, int length3, int to
 void location_copy(location *src, location *dst);
 void vector_copy(vector *src, vector *dst);
 void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH]);
+void print_map(int map[][MAP_LENGTH]);
 
 // Gen Algorithm functions
 void select_parent(int parent[][STATE_LENGTH], int selected[][STATE_LENGTH], int fitness[]);
@@ -268,7 +270,99 @@ int real_rand(int from, int to);
 
 int main() {
 	srand((unsigned)time(NULL));
+	location* p_last = (location*)malloc(sizeof(location));
+	int win, i;
+	int remain_turn = 2;
+	int turn = BLACK;
+	int map[MAP_LENGTH][MAP_LENGTH];
+	unsigned long long int p0[PRIORITY_MAX], p1[PRIORITY_MAX];
 
+	initialize_map(map);
+
+	printf("Initialize finishing...\n");
+
+	p_last->x = -1;
+	p_last->y = -1;
+
+	for (i = 0; i < PRIORITY_MAX; i++) {
+		p0[i] = 5;
+		p1[i] = 5;
+	}
+
+	printf("Generating finishing...\n");
+
+	p_last = ai_turn(map, p0, 1, turn);
+	add_stone(*p_last, map, turn);
+	print_map(map);
+	printf("We putted to %d %d\n", p_last->x, p_last->y);
+	// first turn.
+
+	while (1) {
+		win = is_draw(map);
+		if (win == 1) {
+			printf("draw\n");
+			return -1;
+		}
+		else {
+			win = who_win(map, *p_last);
+			// check if win.
+
+			if (turn == BLACK) {
+				if (win == -1) {
+					// if not win, do ai.
+					p_last = ai_turn(map, p1, remain_turn, BLACK);
+					add_stone(*p_last, map, turn);
+					print_map(map);
+					printf("We putted to %d %d\n", p_last->x, p_last->y);
+				}
+				else if (win == BLACK) {
+					// if win, return.
+					printf("BLACK win\n");
+					return 0;
+				}
+				else if (win == WHITE) {
+					// if win, return.
+					printf("WHITE win\n");
+					return 1;
+				}
+
+				remain_turn--;
+
+				if (remain_turn == 0) {
+					// if not remain_turn is 0...
+					remain_turn = 2;
+					turn = WHITE;
+				}
+			}
+			else {
+				if (win == -1) {
+					// if not win, do ai.
+					p_last = ai_turn(map, p0, remain_turn, WHITE);
+					add_stone(*p_last, map, turn);
+					print_map(map);
+					printf("We putted to %d %d\n", p_last->x, p_last->y);
+				}
+				else if (win == WHITE) {
+					// if win, return.
+					printf("WHITE win\n");
+					return 0;
+				}
+				else if (win == BLACK) {
+					// if win, return.
+					printf("BLACK win\n");
+					return 1;
+				}
+
+				remain_turn--;
+
+				if (remain_turn == 0) {
+					// if not remain_turn is 0...
+					remain_turn = 2;
+					turn = BLACK;
+				}
+			}
+		}
+	}
 
 	return 0;
 }
@@ -936,7 +1030,7 @@ int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]) {
 				temp.y = j;	// Set y to i.
 				if (check_aw(state, temp) == 1) {
 					// If mw from temp is right,
-					vector_copy(&where[vector_num], &temp);
+					vector_copy(&temp, &where[vector_num]);
 					vector_num++;
 				}
 			}
@@ -1094,26 +1188,20 @@ int dir_win(int map[][MAP_LENGTH], location start, location dir, int mine) {
 int is_draw(int map[][MAP_LENGTH]) {
 	//return 1 if draw, else return 0
 	int i, j;
+	int flag = 1;
 
 	for (i = 0; i < MAP_LENGTH; i++) {
 		for (j = 0; j < MAP_LENGTH; j++) {
-			if (map[i][j] != EMPTY || map[i][j] != BLOCKING) {
-				break;
+			if (map[i][j] == EMPTY) {
+				flag = 0;
 			}
 		}
-		if (j != MAP_LENGTH) {
-			break;
-		}
 	}
-	if (i != MAP_LENGTH) {
-		return 1;
-	}
-	else {
-		return 0;
-	}
+
+	return flag;
 }
 
-location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine) {
+location* find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine) {
 	// Find candidate location and save it to candidate.
 	// if no more candidate is recommended, save (-1, -1).
 	// Check every area of map, do it, and check priority is increase or decrease.
@@ -1209,7 +1297,7 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 		}
 	}
 
-	return candidate_real[real_rand(0, candidate_number_real)];
+	return &candidate_real[real_rand(0, candidate_number_real)];
 	// return random value of 0 ~ candidate's number.
 	// this can make sure if highest candidates are many, we can choose randomly location.
 }
@@ -1217,7 +1305,6 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 int add_stone(location where, int map[][MAP_LENGTH], int mine) {
 	// Add stone to 'where' which stone is 'mine', BLACK, WHITE.
 	// If can't do, return 0, else 1
-
 	if (map[where.x][where.y] == EMPTY) {
 		map[where.x][where.y] = mine;
 		return 1;
@@ -1227,76 +1314,76 @@ int add_stone(location where, int map[][MAP_LENGTH], int mine) {
 	}
 }
 
-location ai_turn(int map[][MAP_LENGTH], int priority[], int remain_turn, int mine) {
+location* ai_turn(int map[][MAP_LENGTH], int priority[], int remain_turn, int mine) {
 	// real ai part.
 	// AI do his job with given map.
 	// win when can win, defense when can lose.
 	// else, attack or defense with given candidate.
+
 	int ms[DIR_MAX][MAP_LENGTH][MAP_LENGTH], es[DIR_MAX][MAP_LENGTH][MAP_LENGTH];
 	int aw_number, mw_number, i, j;
 	vector m_aw_where[MAP_LENGTH * MAP_LENGTH], m_mw_where[MAP_LENGTH * MAP_LENGTH];
 	vector e_aw_where[MAP_LENGTH * MAP_LENGTH], e_mw_where[MAP_LENGTH * MAP_LENGTH];
 	location m_mw_dir[MAP_LENGTH * MAP_LENGTH], e_mw_dir[MAP_LENGTH * MAP_LENGTH];
-	location return_value;
+	location* p_last = (location*)malloc(sizeof(location));
 
 	search_state(ms, es, map, mine);
 
 	aw_number = aw_location(ms, m_aw_where);
-	mw_number = mw_location(ms, m_mw_where, m_mw_dir);
 
 	if (aw_number > 0) {
 		for (i = 0; i < aw_number; i++) {
 			// if aw is exist, then we can win.
 			// doing job with remain_turn.
-			return_value = aw_doing(ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y], m_aw_where[i], remain_turn);
-			if (return_value.x != -1) {
+			p_last = aw_doing(ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y], m_aw_where[i], remain_turn);
+			if (p_last->x != -1) {
 				break;
 			}
 		}
 	}
-	if (return_value.x != -1) {
+	if (p_last->x != -1) {
 		// If aw is exist and doing finishing...
-		return return_value;
+		return &p_last;
 	}
 	else {
 		// If aw is exist but can't finish...
 		aw_number = aw_location(es, e_aw_where);
-		mw_number = mw_location(es, e_mw_where, e_mw_dir);
 		if (aw_number > 0) {
 			for (i = 0; i < aw_number; i++) {
 				// if aw is exist, then we can lose, so defense it.
 				// doing job with remain_turn.
-				return_value = aw_doing(ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y], m_aw_where[i], remain_turn);
-				if (return_value.x != -1) {
+				p_last = aw_doing(ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y], m_aw_where[i], remain_turn);
+				if (p_last->x != -1) {
 					break;
 				}
 			}
 		}
 	}
-	if (return_value.x != -1) {
+	if (p_last->x != -1) {
 		// If aw is exist and can be finishing...
-		return return_value;
+		return p_last;
 	}
 	else {
 		// if i can't finish and enemy can't finish.
-		return_value = find_candidate_location(map, ms, es, priority, mine);
+		p_last = find_candidate_location(map, ms, es, priority, mine);
 	}
 
-	return return_value;
+	return p_last;
 }
 
 int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]) {
 	// ai's game with p0, p1 proiority.
 	// return 0 if p0 win, return 1 if p1 win, return -1 if draw.
-	location last_put;
+	location* p_last = (location*)malloc(sizeof(location));
 	int win;
 	int remain_turn = 2;
 	int turn = BLACK;
 
-	last_put.x = -1;
-	last_put.y = -1;
+	p_last->x = -1;
+	p_last->y = -1;
 
-	last_put = ai_turn(map, p0, 1, turn);
+	p_last = ai_turn(map, p0, 1, turn);
+	add_stone(*p_last, map, turn);
 	// first turn.
 
 	while (1) {
@@ -1305,13 +1392,14 @@ int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]) {
 			return -1;
 		}
 		else {
-			win = who_win(map, last_put);
+			win = who_win(map, *p_last);
 			// check if win.
 
 			if (turn == BLACK) {
 				if (win == -1) {
 					// if not win, do ai.
-					last_put = ai_turn(map, p1, remain_turn, BLACK);
+					p_last = ai_turn(map, p1, remain_turn, BLACK);
+					add_stone(*p_last, map, turn);
 				}
 				else if (win == BLACK) {
 					// if win, return.
@@ -1333,7 +1421,8 @@ int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]) {
 			else {
 				if (win == -1) {
 					// if not win, do ai.
-					last_put = ai_turn(map, p0, remain_turn, WHITE);
+					p_last = ai_turn(map, p0, remain_turn, WHITE);
+					add_stone(*p_last, map, turn);
 				}
 				else if (win == WHITE) {
 					// if win, return.
@@ -1356,12 +1445,13 @@ int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]) {
 	}
 }
 
-location aw_doing(int state, vector start_location, int remain_turn) {
+location* aw_doing(int state, vector start_location, int remain_turn) {
 	// at remain_turn is 2, SIGMA can win and at remain_turn is 1, THETA can win.
 	// return where to put to win at that time.
-	location return_value;
-	return_value.x = -1;
-	return_value.y = -1;
+	location* p_last = (location*)malloc(sizeof(location));
+
+	p_last->x = -1;
+	p_last->y = -1;
 
 	if (remain_turn == 2) {
 		if (state >= (SIGMA0 * _STATE_MAX + _0) && state < (THETA0 * _STATE_MAX + _0)) {
@@ -1369,286 +1459,286 @@ location aw_doing(int state, vector start_location, int remain_turn) {
 			if (state == SIGMA0  * _STATE_MAX + _0 || state == SIGMA0  * _STATE_MAX + _2 || state == SIGMA0  * _STATE_MAX + _6 || state == SIGMA0  * _STATE_MAX + _8) {
 				//¥ä0	¡Û¡Û¡Û¡Û¡Ý¡Ý
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 5;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 5;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y + 5;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y + 5;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y - 5;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y - 5;
 				}
 			}
 			else if (state == SIGMA1  * _STATE_MAX + _0 || state == SIGMA1  * _STATE_MAX + _2 || state == SIGMA1  * _STATE_MAX + _6 || state == SIGMA1  * _STATE_MAX + _8) {
 				//¥ä1	¡Û¡Û¡Û¡Ý¡Û¡Ý
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y - 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y - 4;
 				}
 			}
 			else if (state == SIGMA2  * _STATE_MAX + _0 || state == SIGMA2  * _STATE_MAX + _2 || state == SIGMA2  * _STATE_MAX + _6 || state == SIGMA2  * _STATE_MAX + _8) {
 				//¥ä2	¡Û¡Û¡Û¡Ý¡Ý¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y - 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y - 4;
 				}
 			}
 			else if (state == SIGMA3  * _STATE_MAX + _0 || state == SIGMA3  * _STATE_MAX + _2 || state == SIGMA3  * _STATE_MAX + _6 || state == SIGMA3  * _STATE_MAX + _8) {
 				//¥ä3	¡Û¡Û¡Ý¡Û¡Û¡Ý
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 3;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 3;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y + 3;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y + 3;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y - 3;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y - 3;
 				}
 			}
 			else if (state == SIGMA4  * _STATE_MAX + _0 || state == SIGMA4  * _STATE_MAX + _2 || state == SIGMA4  * _STATE_MAX + _6 || state == SIGMA4  * _STATE_MAX + _8) {
 				//¥ä4	¡Û¡Û¡Ý¡Û¡Ý¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 3;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 3;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y + 3;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y + 3;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y - 3;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y - 3;
 				}
 			}
 			else if (state == SIGMA5  * _STATE_MAX + _0 || state == SIGMA5  * _STATE_MAX + _2 || state == SIGMA5  * _STATE_MAX + _6 || state == SIGMA5  * _STATE_MAX + _8) {
 				//¥ä5	¡Û¡Û¡Ý¡Ý¡Û¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y - 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y - 4;
 				}
 			}
 			else if (state == SIGMA6  * _STATE_MAX + _0 || state == SIGMA6  * _STATE_MAX + _2 || state == SIGMA6  * _STATE_MAX + _6 || state == SIGMA6  * _STATE_MAX + _8) {
 				//¥ä6	¡Û¡Ý¡Û¡Û¡Û¡Ý
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 2;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 2;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 6;
-					return_value.y = start_location.y + 2;
+					p_last->x = start_location.x + 6;
+					p_last->y = start_location.y + 2;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 2;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 2;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 2;
-					return_value.y = start_location.y - 2;
+					p_last->x = start_location.x + 2;
+					p_last->y = start_location.y - 2;
 				}
 			}
 			else if (state == SIGMA7  * _STATE_MAX + _0 || state == SIGMA7  * _STATE_MAX + _2 || state == SIGMA7  * _STATE_MAX + _6 || state == SIGMA7  * _STATE_MAX + _8) {
 				//¥ä7	¡Û¡Ý¡Û¡Û¡Ý¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 5;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 5;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y + 5;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y + 5;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y - 5;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y - 5;
 				}
 			}
 			else if (state == SIGMA8  * _STATE_MAX + _0 || state == SIGMA8  * _STATE_MAX + _2 || state == SIGMA8  * _STATE_MAX + _6 || state == SIGMA8  * _STATE_MAX + _8) {
 				//¥ä8	¡Û¡Ý¡Û¡Ý¡Û¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y - 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y - 4;
 				}
 			}
 			else if (state == SIGMA9  * _STATE_MAX + _0 || state == SIGMA9  * _STATE_MAX + _2 || state == SIGMA9  * _STATE_MAX + _6 || state == SIGMA9  * _STATE_MAX + _8) {
 				//¥ä9	¡Û¡Ý¡Ý¡Û¡Û¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 3;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 3;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y + 3;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y + 3;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y - 3;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y - 3;
 				}
 			}
 			else if (state == SIGMA10  * _STATE_MAX + _0 || state == SIGMA10  * _STATE_MAX + _2 || state == SIGMA10  * _STATE_MAX + _6 || state == SIGMA10  * _STATE_MAX + _8) {
 				//¥ä10	¡Ý¡Û¡Û¡Û¡Û¡Ý
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 6;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 6;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 6;
-					return_value.y = start_location.y + 6;
+					p_last->x = start_location.x + 6;
+					p_last->y = start_location.y + 6;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 6;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 6;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 6;
-					return_value.y = start_location.y - 6;
+					p_last->x = start_location.x + 6;
+					p_last->y = start_location.y - 6;
 				}
 			}
 			else if (state == SIGMA11  * _STATE_MAX + _0 || state == SIGMA11  * _STATE_MAX + _2 || state == SIGMA11  * _STATE_MAX + _6 || state == SIGMA11  * _STATE_MAX + _8) {
 				//¥ä11	¡Ý¡Û¡Û¡Û¡Ý¡Û	
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 5;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 5;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y + 5;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y + 5;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y - 5;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y - 5;
 				}
 			}
 			else if (state == SIGMA12  * _STATE_MAX + _0 || state == SIGMA12  * _STATE_MAX + _2 || state == SIGMA12  * _STATE_MAX + _6 || state == SIGMA12  * _STATE_MAX + _8) {
 				//¥ä12	¡Ý¡Û¡Û¡Ý¡Û¡Û	
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y - 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y - 4;
 				}
 			}
 			else if (state == SIGMA13  * _STATE_MAX + _0 || state == SIGMA13  * _STATE_MAX + _2 || state == SIGMA13  * _STATE_MAX + _6 || state == SIGMA13  * _STATE_MAX + _8) {
 				//¥ä13	¡Ý¡Û¡Ý¡Û¡Û¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 3;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 3;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y + 3;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y + 3;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 1;
-					return_value.y = start_location.y - 1;
+					p_last->x = start_location.x + 1;
+					p_last->y = start_location.y - 1;
 				}
 			}
 			else if (state == SIGMA14  * _STATE_MAX + _0 || state == SIGMA14  * _STATE_MAX + _2 || state == SIGMA14  * _STATE_MAX + _6 || state == SIGMA14  * _STATE_MAX + _8) {
 				//¥ä14	¡Ý¡Ý¡Û¡Û¡Û¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 2;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 2;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 2;
-					return_value.y = start_location.y + 2;
+					p_last->x = start_location.x + 2;
+					p_last->y = start_location.y + 2;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 2;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 2;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 2;
-					return_value.y = start_location.y - 2;
+					p_last->x = start_location.x + 2;
+					p_last->y = start_location.y - 2;
 				}
 			}
 		}
@@ -1659,122 +1749,124 @@ location aw_doing(int state, vector start_location, int remain_turn) {
 			if (state == THETA0 * _STATE_MAX + _0 || state == THETA0 * _STATE_MAX + _2 || state == THETA0 * _STATE_MAX + _6 || state == THETA0 * _STATE_MAX + _8) {
 				//¥è0	¡Û¡Û¡Û¡Û¡Û¡Ý
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 6;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 6;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 6;
-					return_value.y = start_location.y + 6;
+					p_last->x = start_location.x + 6;
+					p_last->y = start_location.y + 6;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 6;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 6;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 6;
-					return_value.y = start_location.y - 6;
+					p_last->x = start_location.x + 6;
+					p_last->y = start_location.y - 6;
 				}
 			}
 			else if (state == THETA1 * _STATE_MAX + _0 || state == THETA1 * _STATE_MAX + _2 || state == THETA1 * _STATE_MAX + _6 || state == THETA1 * _STATE_MAX + _8) {
 				//¥è1	¡Û¡Û¡Û¡Û¡Ý¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 5;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 5;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y + 5;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y + 5;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 5;
-					return_value.y = start_location.y - 5;
+					p_last->x = start_location.x + 5;
+					p_last->y = start_location.y - 5;
 				}
 			}
 			else if (state == THETA2 * _STATE_MAX + _0 || state == THETA2 * _STATE_MAX + _2 || state == THETA2 * _STATE_MAX + _6 || state == THETA2 * _STATE_MAX + _8) {
 				//¥è2	¡Û¡Û¡Û¡Ý¡Û¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 4;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 4;
-					return_value.y = start_location.y - 4;
+					p_last->x = start_location.x + 4;
+					p_last->y = start_location.y - 4;
 				}
 			}
 			else if (state == THETA3 * _STATE_MAX + _0 || state == THETA3 * _STATE_MAX + _2 || state == THETA3 * _STATE_MAX + _6 || state == THETA3 * _STATE_MAX + _8) {
 				//¥è3	¡Û¡Û¡Ý¡Û¡Û¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 3;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 3;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y + 3;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y + 3;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 3;
-					return_value.y = start_location.y - 3;
+					p_last->x = start_location.x + 3;
+					p_last->y = start_location.y - 3;
 				}
 			}
 			else if (state == THETA4 * _STATE_MAX + _0 || state == THETA4 * _STATE_MAX + _2 || state == THETA4 * _STATE_MAX + _6 || state == THETA4 * _STATE_MAX + _8) {
 				//¥è4	¡Û¡Ý¡Û¡Û¡Û¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 2;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 2;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 2;
-					return_value.y = start_location.y + 2;
+					p_last->x = start_location.x + 2;
+					p_last->y = start_location.y + 2;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 2;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 2;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 2;
-					return_value.y = start_location.y - 2;
+					p_last->x = start_location.x + 2;
+					p_last->y = start_location.y - 2;
 				}
 			}
 			else if (state == THETA5 * _STATE_MAX + _0 || state == THETA5 * _STATE_MAX + _2 || state == THETA5 * _STATE_MAX + _6 || state == THETA5 * _STATE_MAX + _8) {
 				//¥è5	¡Ý¡Û¡Û¡Û¡Û¡Û
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
-					return_value.x = start_location.x + 0;
-					return_value.y = start_location.y + 1;
+					p_last->x = start_location.x + 0;
+					p_last->y = start_location.y + 1;
 				}
 				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
-					return_value.x = start_location.x + 1;
-					return_value.y = start_location.y + 1;
+					p_last->x = start_location.x + 1;
+					p_last->y = start_location.y + 1;
 				}
 				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
-					return_value.x = start_location.x + 1;
-					return_value.y = start_location.y + 0;
+					p_last->x = start_location.x + 1;
+					p_last->y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-					return_value.x = start_location.x + 1;
-					return_value.y = start_location.y - 1;
+					p_last->x = start_location.x + 1;
+					p_last->y = start_location.y - 1;
 				}
 			}
 		}
 	}
 
-	return return_value;
+	return p_last;
 }
+
+
 
 void initialize_map(int map[][MAP_LENGTH]) {
 	// Initialize map to EMPTY which is defined.
@@ -1839,6 +1931,31 @@ void map_copy(int temp_map[][MAP_LENGTH], int map[][MAP_LENGTH]) {
 		}
 	}
 }
+
+void print_map(int map[][MAP_LENGTH]) {
+	int i, j;
+	printf("[ MAP ]\n");
+	for (i = 0; i < MAP_LENGTH; i++) {
+		for (j = 0; j < MAP_LENGTH; j++) {
+			if (map[i][j] == WHITE) {
+				printf("¡Û");
+			}
+			else if (map[i][j] == BLACK) {
+				printf("¡Ü");
+			}
+			else if (map[i][j] == BLOCKING) {
+				printf("¡Ù");
+			}
+			else {
+				printf("¦«");
+			}
+		}
+		printf("\n");
+	}
+	Sleep(1000);
+}
+
+
 
 void select_parent(int parent[][STATE_LENGTH], int selected[][STATE_LENGTH], int fitness[]) {
 	// Select PARAENT_MAX parents from parent[GENERATION_MAX][STATE_LENGTH] with fitness[GENERATION_MAX] values.
