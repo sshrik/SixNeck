@@ -1196,44 +1196,45 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 	for (i = 0; i < MAP_LENGTH; i++) {
 		to.x = i;
 		for (j = 0; j < MAP_LENGTH; j++) {
-			to.y = j;	// Check Every area.
-			if (candidate_number < CANDIDATE_MAX) {
-				if (add_stone(to, temp_map, mine) == 1) {
-					search_state(temp_ms, temp_es, temp_map, mine);
-					temp_mine = get_state_priority(temp_ms, priority);
-					temp_enemy = get_state_priority(temp_es, priority);
-					// Caculate changed priority or state.
-					if (now_mine < temp_mine) {
-						if(highest_mine < temp_mine)	{
-							highest_mine = temp_mine;
-						}
-						location_copy(&to, &candidate[candidate_number]);
-						mine_priority[candidate_number] = temp_mine;
-						enemy_priority[candidate_number] = temp_enemy;
-						// Save it to existing array.
-						candidate_number++;
-					}
-
-					if (now_enemy < temp_enemy) {
-						if(highest_enemy < temp_enemy)	{
-							highest_enemy = temp_enemy;
-						}
-						location_copy(&to, &candidate[candidate_number]);
-						mine_priority[candidate_number] = temp_mine;
-						enemy_priority[candidate_number] = temp_enemy;
-						// Save it to existing array.
-						candidate_number++;
-					}
-
-					map_copy(temp_map, map);
-					array3_initializer(temp_ms, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
-					array3_initializer(temp_es, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
-					// Initialize to reuse.
+			to.y = j;	
+			// Check Every area.
+			if (add_stone(to, temp_map, mine) == 1) {
+				// If can do add at some place..
+				search_state(temp_ms, temp_es, temp_map, mine);
+				temp_mine = get_state_priority(temp_ms, priority);
+				temp_enemy = get_state_priority(temp_es, priority);
+				// Caculate changed priority or state.	
+				if (now_mine < temp_mine) {
+					if(highest_mine < temp_mine)	{
+						highest_mine = temp_mine;
+					}// find highest value of my priority
+					
+					location_copy(&to, &candidate[candidate_number]);
+					mine_priority[candidate_number] = temp_mine;
+					enemy_priority[candidate_number] = temp_enemy;
+					// Save it to existing array.
+					candidate_number++;
 				}
-			}
+				
+				if (now_enemy < temp_enemy) {
+					if(highest_enemy < temp_enemy)	{
+						highest_enemy = temp_enemy;
+					}// find highest value of enemy priority
+					
+					location_copy(&to, &candidate[candidate_number]);
+					mine_priority[candidate_number] = temp_mine;
+					enemy_priority[candidate_number] = temp_enemy;
+					// Save it to existing array.
+					candidate_number++;
+				}
+	
+				map_copy(temp_map, map);
+				array3_initializer(temp_ms, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
+				array3_initializer(temp_es, DIR_MAX, MAP_LENGTH, MAP_LENGTH, NONE_STATE);
+				// Initialize to reuse.
+			}	
 		}
 	}
-
 	if( highest_mine - now_mine >= highest_enemy -  now_enemy ) 	{
 		// if attack...
 		for(i = 0; i < candidate_number; i++)	{
@@ -1256,6 +1257,8 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 	}
 	
 	return candidate_real[real_rand(0, candidate_number_real)];
+	// return random value of 0 ~ candidate's number.
+	// this can make sure if highest candidates are many, we can choose randomly location.
 }
 
 int add_stone(location where, int map[][MAP_LENGTH], int mine) {
