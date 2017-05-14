@@ -1171,21 +1171,28 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 	// Calculate where to put.
 
 	location return_value, to;
-	location candidate[400];
-	unsigned long long int enemy_priority[400], mine_priority[400];
+	location candidate[MAP_LENGTH * MAP_LENGTH*2];
+	location candidate_real[MAP_LENGTH * MAP_LENGTH];
+	
+	unsigned long long int enemy_priority[MAP_LENGTH * MAP_LENGTH], mine_priority[MAP_LENGTH * MAP_LENGTH];
 	// case of all area is candidate.
 	// Find all case can do.
 	unsigned long long int now_mine = get_state_priority(ms, priority);
 	unsigned long long int now_enemy = get_state_priority(es, priority);
 	unsigned long long int temp_mine, temp_enemy;
-
+	unsigned long long int highest_mine, highest_enemy;
+	
 	int candidate_number = 0;
+	int andidate_number_real = 0;
+	int i, j, temp_my_index, temp_enemy_index;
+	
 	int temp_map[MAP_LENGTH][MAP_LENGTH];
 	int temp_ms[DIR_MAX][MAP_LENGTH][MAP_LENGTH], temp_es[DIR_MAX][MAP_LENGTH][MAP_LENGTH];
-	int i, j, temp_my_index, temp_enemy_index;
 
 	map_copy(temp_map, map);
-
+	highest_mine = -1;
+	highest_enemy = -1;
+	
 	for (i = 0; i < MAP_LENGTH; i++) {
 		to.x = i;
 		for (j = 0; j < MAP_LENGTH; j++) {
@@ -1197,6 +1204,9 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 					temp_enemy = get_state_priority(temp_es, priority);
 					// Caculate changed priority or state.
 					if (now_mine < temp_mine) {
+						if(highest_mine < temp_mine)	{
+							highest_mine = temp_mine;
+						}
 						location_copy(&to, &candidate[candidate_number]);
 						mine_priority[candidate_number] = temp_mine;
 						enemy_priority[candidate_number] = temp_enemy;
@@ -1205,6 +1215,9 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 					}
 
 					if (now_enemy < temp_enemy) {
+						if(highest_enemy < temp_enemy)	{
+							highest_enemy = temp_enemy;
+						}
 						location_copy(&to, &candidate[candidate_number]);
 						mine_priority[candidate_number] = temp_mine;
 						enemy_priority[candidate_number] = temp_enemy;
@@ -1221,35 +1234,28 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 		}
 	}
 
-	/*
-		mine_priority[i] 중 가장 큰 것, 혹은 큰 것들을 찾는다.
-		enemy_priority[i] 중 가장 큰 것, 혹은 큰 것들을 찾는다.
-	*/
-
-
-
-
-	//Decide where to put with calculated data.
-	temp_my_index = 0;
-	temp_enemy_index = 0;
-	for (i = 0; i < candidate_number; i++) {
-		if (mine_priority[i] - now_mine > mine_priority[temp_my_index] - now_mine) {
-			temp_my_index = i;
-		} // Calculate biggist priority index of my state.
-		if ( mine_priority[i] - now_enemy > mine_priority[temp_enemy_index] - now_enemy) {
-			temp_enemy_index = i;
-		} // Calculate biggist priority index of enemy state.
-	}
-	if (mine_priority[temp_my_index] - now_mine >= mine_priority[temp_enemy_index] - now_enemy) {
-		return_value = candidate[temp_my_index];
-		// If attack priority is higher then shield priorty..
+	if( highest_mine - now_mine >= highest_enemy -  now_enemy ) 	{
+		// if attack...
+		for(i = 0; i < candidate_number; i++)	{
+			if(mine_priority[i] == highest_mine)	{
+				// find highest my candidate or candidates
+				location_copy( candidate[i], candidate_real[candidate_number_real] );
+				candidate_number_real++;
+			}
+		}
 	}
 	else {
-		return_value = candidate[temp_enemy_index];
-		// If attack priority is higher then shield priorty..
+		// if defense...
+		for(i = 0; i < candidate_number; i++)	{
+			if(enemy_priority[i] == highest_enemy)	{
+				// find highest enemy's candidate or candidates
+				location_copy( candidate[i], candidate_real[candidate_number_real] );
+				candidate_number_real++;
+			}
+		}
 	}
-
-	return return_value;
+	
+	return candidate_real[real_rand(0, candidate_number_real)];
 }
 
 int add_stone(location where, int map[][MAP_LENGTH], int mine) {
@@ -1481,5 +1487,15 @@ void suffle_generation(int generation[][STATE_LENGTH]) {
 }
 
 int real_rand(int from, int to)	{
+	// return real random value from 'from' to 'to'.
+	int return_value = -1;
+	srand((unsigned)time(NULL));
+	// Seed Initialize.
 
+	while(return_value < from && return_value >= to) {
+		// If out of range, iterate.
+		return_value = rand();
+	}
+
+	return return_value;
 }
