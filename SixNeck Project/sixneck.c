@@ -246,7 +246,7 @@ int dir_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
 int is_draw(int map[][MAP_LENGTH]);
 location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine);
 int add_stone(location where, int map[][MAP_LENGTH], int mine);
-location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put);
+location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int remain_turn, int mine);
 int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]);
 location aw_doing(int state, vector start_location, int remain_turn);
 
@@ -314,15 +314,15 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 		dir.x = 1;
 		dir.y = 0;
 	}
-	else if (start.dir = NORTH_EAST) {
+	else if (start.dir == NORTH_EAST) {
 		dir.x = 1;
 		dir.y = -1;
 	}
-	else if (start.dir = SOUTH) {
+	else if (start.dir == SOUTH) {
 		dir.x = 0;
 		dir.y = 1;
 	}
-	else if (start.dir = SOUTH_EAST) {
+	else if (start.dir == SOUTH_EAST) {
 		dir.x = 1;
 		dir.y = 1;
 	}
@@ -930,7 +930,7 @@ int mw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[], location di
 
 	for (k = 0; k < DIR_MAX; k++) {
 		temp.dir = k;	// Set dir to k.
-		// We already defined NORTH_EAST to 0 ... etc.
+						// We already defined NORTH_EAST to 0 ... etc.
 		for (i = 0; i < MAP_LENGTH; i++) {
 			temp.x = i;	// Set x to i.
 			for (j = 0; j < MAP_LENGTH; j++) {
@@ -1004,7 +1004,7 @@ int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]) {
 
 	for (k = 0; k < DIR_MAX; k++) {
 		temp.dir = k;	// Set dir to k.
-		// We already defined NORTH_EAST to 0 ... etc.
+						// We already defined NORTH_EAST to 0 ... etc.
 		for (i = 0; i < MAP_LENGTH; i++) {
 			temp.x = i;	// Set x to i.
 			for (j = 0; j < MAP_LENGTH; j++) {
@@ -1166,21 +1166,21 @@ int dir_win(int map[][MAP_LENGTH], location start, location dir, int mine) {
 	}
 }
 
-int is_draw(int map[][MAP_LENGTH])	{
+int is_draw(int map[][MAP_LENGTH]) {
 	//return 1 if draw, else return 0
 	int i, j;
 
-	for (i = 0; i < MAP_LENGTH; i++)	{
-		for (j = 0; j < MAP_LENGTH; j++)	{
-			if (map[i][j] != EMPTY || map[i][j] != BLOCKING)	{
+	for (i = 0; i < MAP_LENGTH; i++) {
+		for (j = 0; j < MAP_LENGTH; j++) {
+			if (map[i][j] != EMPTY || map[i][j] != BLOCKING) {
 				break;
 			}
 		}
-		if (j != MAP_LENGTH)	{
+		if (j != MAP_LENGTH) {
 			break;
 		}
 	}
-	if (i != MAP_LENGTH)	{
+	if (i != MAP_LENGTH) {
 		return 1;
 	}
 	else {
@@ -1233,7 +1233,7 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 				temp_enemy = get_state_priority(temp_es, priority);
 				// Caculate changed priority or state.	
 				if (now_mine < temp_mine) {
-					if (highest_mine < temp_mine)	{
+					if (highest_mine < temp_mine) {
 						highest_mine = temp_mine;
 					}// find highest value of my priority
 
@@ -1245,7 +1245,7 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 				}
 
 				if (now_enemy < temp_enemy) {
-					if (highest_enemy < temp_enemy)	{
+					if (highest_enemy < temp_enemy) {
 						highest_enemy = temp_enemy;
 					}// find highest value of enemy priority
 
@@ -1263,10 +1263,10 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 			}
 		}
 	}
-	if (highest_mine - now_mine >= highest_enemy - now_enemy) 	{
+	if (highest_mine - now_mine >= highest_enemy - now_enemy) {
 		// if attack...
-		for (i = 0; i < candidate_number; i++)	{
-			if (mine_priority[i] == highest_mine)	{
+		for (i = 0; i < candidate_number; i++) {
+			if (mine_priority[i] == highest_mine) {
 				// find highest my candidate or candidates
 				location_copy(&candidate[i], &candidate_real[candidate_number_real]);
 				candidate_number_real++;
@@ -1275,8 +1275,8 @@ location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP
 	}
 	else {
 		// if defense...
-		for (i = 0; i < candidate_number; i++)	{
-			if (enemy_priority[i] == highest_enemy)	{
+		for (i = 0; i < candidate_number; i++) {
+			if (enemy_priority[i] == highest_enemy) {
 				// find highest enemy's candidate or candidates
 				location_copy(&candidate[i], &candidate_real[candidate_number_real]);
 				candidate_number_real++;
@@ -1302,7 +1302,7 @@ int add_stone(location where, int map[][MAP_LENGTH], int mine) {
 	}
 }
 
-location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int remain_turn, int mine)	{
+location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int remain_turn, int mine) {
 	// real ai part.
 	// AI do his job with given map.
 	// win when can win, defense when can lose.
@@ -1319,13 +1319,13 @@ location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int r
 	aw_number = aw_location(ms, m_aw_where);
 	mw_number = mw_location(ms, m_mw_where, m_mw_dir);
 
-	if (mw_number > 0)	{
+	if (mw_number > 0) {
 
 	}
-	else if (aw_number > 0)	{
-		if (remain_turn == 1)	{
-			for (i = 0; i < aw_number; i++)	{
-				if (ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y] >= (SIGMA0 * _STATE_MAX + _0) && ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y] < (THETA0 * _STATE_MAX + _0))	{
+	else if (aw_number > 0) {
+		if (remain_turn == 1) {
+			for (i = 0; i < aw_number; i++) {
+				if (ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y] >= (SIGMA0 * _STATE_MAX + _0) && ms[m_aw_where[i].dir][m_aw_where[i].x][m_aw_where[i].y] < (THETA0 * _STATE_MAX + _0)) {
 					// if state is at SIGMA and remain turn is 1...
 					return_value.x = -1;
 					return_value.y = -1;
@@ -1341,7 +1341,7 @@ location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int r
 	return return_value;
 }
 
-int ai_game(int map[][MAP_LENGTH], int p0[], int p1[])	{
+int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]) {
 	// ai's game with p0, p1 proiority.
 	// return 0 if p0 win, return 1 if p1 win, return -1 if draw.
 	location last_put;
@@ -1355,54 +1355,54 @@ int ai_game(int map[][MAP_LENGTH], int p0[], int p1[])	{
 	last_put = ai_turn(map, p0, last_put, 1, turn);
 	// first turn.
 
-	while (1)	{
+	while (1) {
 		win = is_draw(map);
-		if (win == 1)	{
+		if (win == 1) {
 			return -1;
 		}
 		else {
 			win = who_win(map, last_put);
 			// check if win.
 
-			if (turn == BLACK)	{
-				if (win == -1)	{
+			if (turn == BLACK) {
+				if (win == -1) {
 					// if not win, do ai.
 					last_put = ai_turn(map, p1, last_put, remain_turn, BLACK);
 				}
-				else if (win == BLACK)	{
+				else if (win == BLACK) {
 					// if win, return.
 					return 0;
 				}
-				else if (win == WHITE)	{
+				else if (win == WHITE) {
 					// if win, return.
 					return 1;
 				}
 
 				remain_turn--;
 
-				if (remain_turn == 0)	{
+				if (remain_turn == 0) {
 					// if not remain_turn is 0...
 					remain_turn = 2;
 					turn = WHITE;
 				}
 			}
 			else {
-				if (win == -1)	{
+				if (win == -1) {
 					// if not win, do ai.
 					last_put = ai_turn(map, p0, last_put, remain_turn, WHITE);
 				}
-				else if (win == WHITE)	{
+				else if (win == WHITE) {
 					// if win, return.
 					return 0;
 				}
-				else if (win == BLACK)	{
+				else if (win == BLACK) {
 					// if win, return.
 					return 1;
 				}
 
 				remain_turn--;
 
-				if (remain_turn == 0)	{
+				if (remain_turn == 0) {
 					// if not remain_turn is 0...
 					remain_turn = 2;
 					turn = BLACK;
@@ -1412,60 +1412,143 @@ int ai_game(int map[][MAP_LENGTH], int p0[], int p1[])	{
 	}
 }
 
-int can_win_immidiate()	{
+int can_win_immidiate() {
 
 }
 
-location mw_doing()	{
+location mw_doing() {
 
 }
 
-location aw_doing(int state, vector start_location, int remain_turn)	{
+location aw_doing(int state, vector start_location, int remain_turn) {
 	// at remain_turn is 2, SIGMA can win and at remain_turn is 1, THETA can win.
 	// return where to put to win at that time.
 	location return_value;
 
-	if (remain_turn == 2)	{
-		if (state >= (SIGMA0 * _STATE_MAX + _0) && state < (THETA0 * _STATE_MAX + _0))	{
+	if (remain_turn == 2) {
+		if (state >= (SIGMA0 * _STATE_MAX + _0) && state < (THETA0 * _STATE_MAX + _0)) {
 			// if state is at SIGMA and remain turn is 2...
-			/*
-			θ	5개의 내 돌 ( ○ ) 존재 = { θ0, θ1, θ2 ... θ5 }
-			θ0	○○○○○◎	θ1	○○○○◎○	θ2	○○○◎○○	θ3	○○◎○○○	θ4	○◎○○○○
-			θ5	◎○○○○○
-			*/
+			if (state == SIGMA0  * _STATE_MAX + _0 || state == SIGMA0  * _STATE_MAX + _2 || state == SIGMA0  * _STATE_MAX + _6 || state == SIGMA0  * _STATE_MAX + _8) {
+
+			}
 		}
 	}
 	else {
 		if (state < (SIGMA0 * _STATE_MAX + _0) || state >= (THETA0 * _STATE_MAX + _0)) {
 			// if state is at THETA and remain turn is 1...
-			if (state == THETA0 * _STATE_MAX + _0 || state == THETA0 * _STATE_MAX + _2 || state == THETA0 * _STATE_MAX + _6 || state == THETA0 * _STATE_MAX + _8)	{
-				if (start_location.dir == SOUTH)	{ // increase ( 0, 1 )
-
+			if (state == THETA0 * _STATE_MAX + _0 || state == THETA0 * _STATE_MAX + _2 || state == THETA0 * _STATE_MAX + _6 || state == THETA0 * _STATE_MAX + _8) {
+				//θ0	○○○○○◎
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 6;
 				}
-				else if (start_location.dir == SOUTH_EAST)	{ // increase ( 1, 1 )
-
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 6;
+					return_value.y = start_location.y + 6;
 				}
-				else if (start_location.dir == EAST)	{ // increase ( 1 , 0 )
-
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 6;
+					return_value.y = start_location.y + 0;
 				}
 				else {	// increase ( 1, -1 )
-
+					return_value.x = start_location.x + 6;
+					return_value.y = start_location.y - 6;
 				}
 			}
-			else if (state == THETA1 * _STATE_MAX + _0 || state == THETA1 * _STATE_MAX + _2 || state == THETA1 * _STATE_MAX + _6 || state == THETA1 * _STATE_MAX + _8)	{
-
+			else if (state == THETA1 * _STATE_MAX + _0 || state == THETA1 * _STATE_MAX + _2 || state == THETA1 * _STATE_MAX + _6 || state == THETA1 * _STATE_MAX + _8) {
+				//θ1	○○○○◎○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 5;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y + 5;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 5;
+					return_value.y = start_location.y - 5;
+				}
 			}
-			else if (state == THETA2 * _STATE_MAX + _0 || state == THETA2 * _STATE_MAX + _2 || state == THETA2 * _STATE_MAX + _6 || state == THETA2 * _STATE_MAX + _8)	{
-
+			else if (state == THETA2 * _STATE_MAX + _0 || state == THETA2 * _STATE_MAX + _2 || state == THETA2 * _STATE_MAX + _6 || state == THETA2 * _STATE_MAX + _8) {
+				//θ2	○○○◎○○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 4;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 4;
+					return_value.y = start_location.y - 4;
+				}
 			}
-			else if (state == THETA3 * _STATE_MAX + _0 || state == THETA3 * _STATE_MAX + _2 || state == THETA3 * _STATE_MAX + _6 || state == THETA3 * _STATE_MAX + _8)	{
-
+			else if (state == THETA3 * _STATE_MAX + _0 || state == THETA3 * _STATE_MAX + _2 || state == THETA3 * _STATE_MAX + _6 || state == THETA3 * _STATE_MAX + _8) {
+				//θ3	○○◎○○○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 3;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y + 3;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 3;
+					return_value.y = start_location.y - 3;
+				}
 			}
-			else if (state == THETA4 * _STATE_MAX + _0 || state == THETA4 * _STATE_MAX + _2 || state == THETA4 * _STATE_MAX + _6 || state == THETA4 * _STATE_MAX + _8)	{
-
+			else if (state == THETA4 * _STATE_MAX + _0 || state == THETA4 * _STATE_MAX + _2 || state == THETA4 * _STATE_MAX + _6 || state == THETA4 * _STATE_MAX + _8) {
+				//θ4	○◎○○○○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 2;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 2;
+					return_value.y = start_location.y + 2;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 2;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 2;
+					return_value.y = start_location.y - 2;
+				}
 			}
-			else if (state == THETA5 * _STATE_MAX + _0 || state == THETA5 * _STATE_MAX + _2 || state == THETA5 * _STATE_MAX + _6 || state == THETA5 * _STATE_MAX + _8)	{
-
+			else if (state == THETA5 * _STATE_MAX + _0 || state == THETA5 * _STATE_MAX + _2 || state == THETA5 * _STATE_MAX + _6 || state == THETA5 * _STATE_MAX + _8) {
+				//θ5	◎○○○○○
+				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
+					return_value.x = start_location.x + 0;
+					return_value.y = start_location.y + 1;
+				}
+				else if (start_location.dir == SOUTH_EAST) { // increase ( 1, 1 )
+					return_value.x = start_location.x + 1;
+					return_value.y = start_location.y + 1;
+				}
+				else if (start_location.dir == EAST) { // increase ( 1 , 0 )
+					return_value.x = start_location.x + 1;
+					return_value.y = start_location.y + 0;
+				}
+				else {	// increase ( 1, -1 )
+					return_value.x = start_location.x + 1;
+					return_value.y = start_location.y - 1;
+				}
 			}
 		}
 	}
@@ -1547,7 +1630,7 @@ void select_parent(int parent[][STATE_LENGTH], int selected[][STATE_LENGTH], int
 		index[i] = i;
 	}
 
-	for (i = 0; i < GENERATION_MAX; i++)	{
+	for (i = 0; i < GENERATION_MAX; i++) {
 		temp_fit[i] = fitness[i];
 	}
 
@@ -1587,12 +1670,12 @@ void set_fitness(int generation[][STATE_LENGTH], int given_set[], int fitness[])
 
 	initialize_map(map);
 
-	for (i = 0; i < GENERATION_MAX; i++)	{
-		while (play < GAME_MAX)	{
+	for (i = 0; i < GENERATION_MAX; i++) {
+		while (play < GAME_MAX) {
 			win = ai_game(map, &generation[i], given_set);
 			// game processed generation[i] first.
 
-			if (win == 0)	{
+			if (win == 0) {
 				//generation[i]'s win.
 				win_number++;
 				play++;
@@ -1603,7 +1686,7 @@ void set_fitness(int generation[][STATE_LENGTH], int given_set[], int fitness[])
 			win = ai_game(map, given_set, &generation[i]);
 			// game processed given_set first.
 
-			if (win == 0)	{
+			if (win == 0) {
 				//generation[i]'s win.
 				win_number++;
 				play++;
@@ -1723,16 +1806,16 @@ void generate_mutation(int generation[][STATE_LENGTH], int fitness[]) {
 
 	int i, j, random_value;
 
-	for (i = 0; i < GENERATION_MAX; i++)	{
-		for (j = 0; j < STATE_LENGTH; j++)	{
-			if (real_rand(0, FITNESS_MAX) < fitness[i])	{
+	for (i = 0; i < GENERATION_MAX; i++) {
+		for (j = 0; j < STATE_LENGTH; j++) {
+			if (real_rand(0, FITNESS_MAX) < fitness[i]) {
 				generation[i][j] = real_rand(0, PRIORITY_MAX);
 			}
 		}
 	}
 }
 
-int real_rand(int from, int to)	{
+int real_rand(int from, int to) {
 	// return real random value from 'from' to 'to'.
 	int return_value = -1;
 	srand((unsigned)time(NULL));
