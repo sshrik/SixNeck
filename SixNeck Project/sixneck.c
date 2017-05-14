@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
+
 /*
 [목표] : 6칸을 만들어 승리 / 상대의 6칸을 방해
 1. 탐색하여 my_state 와 enemy_state 를 채운다.
@@ -215,8 +216,9 @@ aw set : { δ, θ set } X { _0, _2, _6, _8 }
 #define PARENT_MAX 4
 #define CROSS_POINT_MAX 30
 #define SIVILING_MAX 5
+#define PRIORITY_MAX 5000
 #define FITNESS_MAX 5000
-#define GAME_MAX 125
+#define GAME_MAX 500
 
 typedef struct {
 	short x;
@@ -244,7 +246,7 @@ int dir_win(int map[][MAP_LENGTH], location where_put, location dir, int mine);
 int is_draw(int map[][MAP_LENGTH]);
 location find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MAP_LENGTH], int es[][MAP_LENGTH][MAP_LENGTH], int priority[], int mine);
 int add_stone(location where, int map[][MAP_LENGTH], int mine);
-void ai_turn(int map[][MAP_LENGTH], int priority[], location last_put);
+location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put);
 int ai_game(int map[][MAP_LENGTH], int p0[], int p1[]);
 
 // Utilization Functions
@@ -1299,7 +1301,7 @@ int add_stone(location where, int map[][MAP_LENGTH], int mine) {
 	}
 }
 
-void ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int remain_turn)	{
+location ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int remain_turn, int mine)	{
 	// real ai part.
 	// AI do his job with given map.
 	// win when can win, defense when can lose.
@@ -1311,8 +1313,72 @@ void ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int remai
 int ai_game(int map[][MAP_LENGTH], int p0[], int p1[])	{
 	// ai's game with p0, p1 proiority.
 	// return 0 if p0 win, return 1 if p1 win, return -1 if draw.
+	location last_put;
+	int win;
+	int remain_turn = 2;
+	int turn = BLACK;
 
+	last_put.x = -1;
+	last_put.y = -1;
 
+	last_put = ai_turn(map, p0, last_put, 1, turn);
+	// first turn.
+
+	while (1)	{
+		win = is_draw(map);
+		if (win == 1)	{
+			return -1;
+		}
+		else {
+			win = who_win(map, last_put);
+			// check if win.
+
+			if (turn == BLACK)	{
+				if (win == -1)	{
+					// if not win, do ai.
+					last_put = ai_turn(map, p1, last_put, remain_turn, BLACK);
+				}
+				else if (win == BLACK)	{
+					// if win, return.
+					return 0;
+				}
+				else if (win == WHITE)	{
+					// if win, return.
+					return 1;
+				}
+
+				remain_turn--;
+
+				if (remain_turn == 0)	{
+					// if not remain_turn is 0...
+					remain_turn = 2;
+					turn = WHITE;
+				}
+			}
+			else {
+				if (win == -1)	{
+					// if not win, do ai.
+					last_put = ai_turn(map, p0, last_put, remain_turn, WHITE);
+				}
+				else if (win == WHITE)	{
+					// if win, return.
+					return 0;
+				}
+				else if (win == BLACK)	{
+					// if win, return.
+					return 1;
+				}
+
+				remain_turn--;
+
+				if (remain_turn == 0)	{
+					// if not remain_turn is 0...
+					remain_turn = 2;
+					turn = BLACK;
+				}
+			}
+		}
+	}
 }
 
 void initialize_map(int map[][MAP_LENGTH]) {
@@ -1441,6 +1507,7 @@ void set_fitness(int generation[][STATE_LENGTH], int given_set[], int fitness[])
 		}
 		fitness[i] = (int)(FITNESS_MAX / GAME_MAX) * win_number;
 	}
+
 }
 
 void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENGTH]) {
@@ -1547,6 +1614,15 @@ void generate_mutation(int generation[][STATE_LENGTH], int fitness[]) {
 	// if else, don't mutate.
 	// for all part of generic.
 
+	int i, j, random_value;
+
+	for (i = 0; i < GENERATION_MAX; i++)	{
+		for (j = 0; j < STATE_LENGTH; j++)	{
+			if (real_rand(0, FITNESS_MAX) < fitness[i])	{
+				generation[i][j] = real_rand(0, PRIORITY_MAX);
+			}
+		}
+	}
 
 }
 
@@ -1556,7 +1632,7 @@ int real_rand(int from, int to)	{
 	srand((unsigned)time(NULL));
 	// Seed Initialize.
 
-	while (return_value < from && return_value >= to) {
+	while (return_value < from || return_value >= to) {
 		// If out of range, iterate.
 		return_value = rand();
 	}
