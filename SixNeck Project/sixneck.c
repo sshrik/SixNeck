@@ -216,6 +216,7 @@ aw set : { ¥ä, ¥è set } X { _0, _2, _6, _8 }
 #define CROSS_POINT_MAX 30
 #define SIVILING_MAX 5
 #define FITNESS_MAX 5000
+#define GAME_MAX 125
 
 typedef struct {
 	short x;
@@ -1298,7 +1299,7 @@ int add_stone(location where, int map[][MAP_LENGTH], int mine) {
 	}
 }
 
-void ai_turn(int map[][MAP_LENGTH], int priority[], location last_put)	{
+void ai_turn(int map[][MAP_LENGTH], int priority[], location last_put, int remain_turn)	{
 	// real ai part.
 	// AI do his job with given map.
 	// win when can win, defense when can lose.
@@ -1422,10 +1423,24 @@ void set_fitness(int generation[][STATE_LENGTH], int given_set[], int fitness[])
 	// Probability of victory is average of result of every other generations.
 
 	int map[MAP_LENGTH][MAP_LENGTH];
-	int win;
-	initialize_map(map);
-	win = ai_game();
+	int win, i;
+	int play = 0;
+	int win_number = 0;
 
+	initialize_map(map);
+
+	for (i = 0; i < GENERATION_MAX; i++)	{
+		while (play < GAME_MAX)	{
+			win = ai_game(map, &generation[i], given_set);
+			if (win == 0)	{
+				//generation[i]'s win.
+				win_number++;
+				play++;
+			}
+			initialize_map(map);
+		}
+		fitness[i] = (int)(FITNESS_MAX / GAME_MAX) * win_number;
+	}
 }
 
 void generate_generation(int geneartion[][STATE_LENGTH], int parent[][STATE_LENGTH]) {
