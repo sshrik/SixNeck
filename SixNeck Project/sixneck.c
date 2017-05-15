@@ -4,10 +4,10 @@
 #include<windows.h>
 
 /*
-[목표] : 6칸을 만들어 승리 / 상대의 6칸을 방해
-1. 탐색하여 my_state 와 enemy_state 를 채운다.
+[???] : 6??? ?????? ?¸? / ?????? 6??? ????
+1. ?????? my_state ?? enemy_state ?? ?????.
 -> void search_state(int ms[][MAP_LENGTH], int es[][MAP_LENGTH], int priority[], int mine);
-맵을 정의하여야 한다.
+???? ????????? ???.
 */
 #define MAP_LENGTH 20
 #define DIR_MAX 4
@@ -22,61 +22,61 @@
 #define BLOCKING 3
 
 /*
-2. 행동 조건에 따라 행동한다.
+2. ?? ????? ???? ?????.
 -> void act(int ms[][MAP_LENGTH], int es[][MAP_LENGTH], int priority[], int mine);
-- 내꺼가 이기는 상태( mw, aw ) 가 1개라도 있으면 바로 승리하게 둔다.
+- ?????? ????? ????( mw, aw ) ?? 1?????? ?????? ??? ?¸???? ?д?.
 -> int mw_location( int ms[][MAP_LENGTH], location where[], int priority[], int mine );
 -> int aw_location( int ms[][MAP_LENGTH], location where[], int priority[], int mine );
 -> int can_win(int ms[][MAP_LENGTH], int priority[], int mine);
-- 상대꺼가 이기는 상태 ( mw, aw ) 가 1개라도 있으면 바로 막게 된다.
+- ???벨?? ????? ???? ( mw, aw ) ?? 1?????? ?????? ??? ???? ???.
 -> int can_lose(int es[][MAP_LENGTH], int priority[], int mine);
-- 위의 두 조건이 아닐 시, 후보 위치군을 추출하여 내 가중치를 최대화, 상대 가중치를 최소화시키는
-방향으로 행동한다.
+- ???? ?? ?????? ??? ??, ??? ??????? ??????? ?? ??????? ????, ???? ??????? ?????????
+???????? ?????.
 -> void find_candidate_location(int ms[][MAP_LENGTH],int es[][MAP_LENGTH],location candidate[], int priority[], int mine)
-- 가중치는 int priority[state_length] 로 정의 되어 있다.
-3. 둔다.
+- ??????? int priority[state_length] ?? ???? ??? ???.
+3. ?д?.
 ->	location decide_location( int ms[][MAP_LENGTH], int es[][MAP_LENGTH], int priority[], int mine )
 -> void add_stone(int who, location where, int map[][MAP_LENGTH], int mine)
-4. 승리 조건 판별, 다음 차례가 누구인가 판별 후 진행.
+4. ?¸? ???? ???, ???? ????? ??????? ??? ?? ????.
 -> int who_win( int map[][MAP_LENGTH] );
-5. 승리 / 패배 시 종료. 다음 차례는 1로 가서 계속 진행.
+5. ?¸? / ?й? ?? ????. ???? ????? 1?? ???? ???? ????.
 -> void initialize_map( int map[][MAP_LENGTH], int mine );
 -> void array1_initailizer( int arr[], int length, int toInitialize );
 -> void array2_initailizer( int arr[][MAP_LENGTH], int toInitialize );
 
-이를 위해서 상태를 정의하고, 가중치를 부여해야 한다.
+??? ????? ???¸? ???????, ??????? ?ο???? ???.
 #deifne NONE_STATE -1
 #define EPSILONE_0 0
 #define EPSILONE_1 1
-NONE_STATE 는 -1,
-각 EPSILONE 은 0 * 9 + 0, ALPHA0은 1 * 9 + 0 , ALPHA1 2 * 9 + 0 ... 으로,
-_0 은 0, _1 은 1 .. _n 은 n 을 각각에 대해서 더하는 것으로 진행한다.
-즉 ALPHA3_6 = 4 * 9 + 6 이다.
-... 으로 상태를 정의하도록 한다.
-또한 mw, aw 의 상태는 각 숫자를 써서 프로그래머가 기억하고, 각각 분류 해 준다.
-- 4, 5 개는 전부 aw 이상이니 분류가 쉬울 것이다.
-또한 방향은 */
+NONE_STATE ?? -1,
+?? EPSILONE ?? 0 * 9 + 0, ALPHA0?? 1 * 9 + 0 , ALPHA1 2 * 9 + 0 ... ????,
+_0 ?? 0, _1 ?? 1 .. _n ?? n ?? ?????? ????? ????? ?????? ???????.
+?? ALPHA3_6 = 4 * 9 + 6 ???.
+... ???? ???¸? ????????? ???.
+???? mw, aw ?? ???´? ?? ????? ?? ???α????? ???????, ???? ?з? ?? ???.
+- 4, 5 ???? ???? aw ?????? ?з??? ???? ?????.
+???? ?????? */
 #define NORTH_EAST 0
 #define EAST 1
 #define SOUTH_EAST 2
 #define SOUTH 3
 /*
-과 같이 정의한다.
+?? ???? ???????.
 
-가중치는
+???????
 int priority[state_length];
-과 같이 정의한다.
-- 가중치에 대한 판단을 해야 한다.
-이는 처음에 대략적인 값을 입력 한 뒤, 유전 알고리즘을 통해 진행하도록 한다.
-- 이에 대한 사항은 알아서 진행 해야 할 듯..!
+?? ???? ???????.
+- ??????? ???? ????? ??? ???.
+??? ????? ?뷫???? ???? ??? ?? ??, ???? ????????? ???? ????????? ???.
+- ??? ???? ?????? ???? ???? ??? ?? ??..!
 */
 
-// 상태의 정의는 아래에 주석으로 첨부.
+// ?????? ????? ????? ??????? ÷??.
 
-/*	◎ : EMPTY, ○ : MINE, ● : ENEMY
-◎ / ◎	_0	◎ / ○	_1	◎ / ●	_2
-○ / ◎	_3	○ / ○	_4	○ / ●	_5
-● / ◎	_6	● / ○	_7	● / ●	_8
+/*	?? : EMPTY, ?? : MINE, ?? : ENEMY
+?? / ??	_0	?? / ??	_1	?? / ??	_2
+?? / ??	_3	?? / ??	_4	?? / ??	_5
+?? / ??	_6	?? / ??	_7	?? / ??	_8
 */
 #define _0 0
 #define _1 1
@@ -92,14 +92,14 @@ State is defigned like DELTA5 * _5 or GAMMA7 * _2
 */
 #define NONE_STATE - 1
 /*
-ε : 0개의 내 돌 ( ○ ) 존재
-◎◎◎◎◎◎
+?? : 0???? ?? ?? ( ?? ) ????
+???????
 */
 #define EPSILONE 0
 /*
-α	1개의 내 돌 ( ○ ) 존재 = { α0, α1, α2 ... α5 }
-α0	○◎◎◎◎◎	α1	◎○◎◎◎◎	α2	◎◎○◎◎◎	α3	◎◎◎○◎◎	α4	◎◎◎◎○◎
-α5	◎◎◎◎◎○
+??	1???? ?? ?? ( ?? ) ???? = { ??0, ??1, ??2 ... ??5 }
+??0	???????	??1	???????	??2	???????	??3	???????	??4	???????
+??5	???????
 */
 #define ALPHA0 1
 #define ALPHA1 2
@@ -109,11 +109,11 @@ State is defigned like DELTA5 * _5 or GAMMA7 * _2
 #define ALPHA5 6
 #define ALPHA_MAX 6
 /*
-β	2개의 내 돌 ( ○ ) 존재 = { β0, β1, β2 ... β14 }
-β0	○○◎◎◎◎	β1	○◎○◎◎◎	β2	○◎◎○◎◎	β3	○◎◎◎○◎
-β4	○◎◎◎◎○	β5	◎○○◎◎◎	β6	◎○◎○◎◎	β7	◎○◎◎○◎
-β8	◎○◎◎◎○	β9	◎◎○○◎◎	β10	◎◎○◎○◎	β11	◎◎○◎◎○
-β12	◎◎◎○○◎	β13	◎◎◎○◎○	β14	◎◎◎◎○○
+??	2???? ?? ?? ( ?? ) ???? = { ??0, ??1, ??2 ... ??14 }
+??0	???????	??1	???????	??2	???????	??3	???????
+??4	???????	??5	???????	??6	???????	??7	???????
+??8	???????	??9	???????	??10	???????	??11	???????
+??12	???????	??13	???????	??14	???????
 */
 #define BETA0 7
 #define BETA1 8
@@ -132,13 +132,13 @@ State is defigned like DELTA5 * _5 or GAMMA7 * _2
 #define BETA14 21
 #define BETA_MAX 15
 /*
-γ	3개의 내 돌 ( ○ ) 존재 = { γ0, γ1, γ2 ... γ 19 }
-γ0	○○○◎◎◎	γ1	○○◎○◎◎	γ2	○○◎◎○◎	γ3	○○◎◎◎○
-γ4	○◎○○◎◎	γ5	○◎○◎○◎	γ6	○◎○◎◎○	γ7	○◎◎○○◎
-γ8	○◎◎○◎○	γ9	○◎◎◎○○
-γ10	◎○○○◎◎	γ11	◎○○◎○◎	γ12	◎○○◎◎○	γ13	◎○◎○○◎
-γ14	◎○◎○◎○	γ15	◎○◎◎○○	γ16	◎◎○○○◎	γ17	◎◎○○◎○
-γ18	◎◎○◎○○	γ19	◎◎◎○○○
+??	3???? ?? ?? ( ?? ) ???? = { ??0, ??1, ??2 ... ?? 19 }
+??0	???????	??1	???????	??2	???????	??3	???????
+??4	???????	??5	???????	??6	???????	??7	???????
+??8	???????	??9	???????
+??10	???????	??11	???????	??12	???????	??13	???????
+??14	???????	??15	???????	??16	???????	??17	???????
+??18	???????	??19	???????
 */
 #define GAMMA0 22
 #define GAMMA1 23
@@ -162,12 +162,12 @@ State is defigned like DELTA5 * _5 or GAMMA7 * _2
 #define GAMMA19 41
 #define GAMMA_MAX 20
 /*
-δ	4개의 내 돌 ( ○ ) 존재 = { δ0, δ1, δ2 ... δ14 }
-δ0	○○○○◎◎	δ1	○○○◎○◎	δ2	○○○◎◎○	δ3	○○◎○○◎
-δ4	○○◎○◎○	δ5	○○◎◎○○	δ6	○◎○○○◎	δ7	○◎○○◎○
-δ8	○◎○◎○○	δ9	○◎◎○○○
-δ10	◎○○○○◎	δ11	◎○○○◎○	δ12	◎○○◎○○	δ13	◎○◎○○○
-δ14	◎◎○○○○
+??	4???? ?? ?? ( ?? ) ???? = { ??0, ??1, ??2 ... ??14 }
+??0	???????	??1	???????	??2	???????	??3	???????
+??4	???????	??5	???????	??6	???????	??7	???????
+??8	???????	??9	???????
+??10	???????	??11	???????	??12	???????	??13	???????
+??14	???????
 */
 #define SIGMA0 42
 #define SIGMA1 43
@@ -186,9 +186,9 @@ State is defigned like DELTA5 * _5 or GAMMA7 * _2
 #define SIGMA14 56
 #define SIGMA_MAX 15
 /*
-θ	5개의 내 돌 ( ○ ) 존재 = { θ0, θ1, θ2 ... θ5 }
-θ0	○○○○○◎	θ1	○○○○◎○	θ2	○○○◎○○	θ3	○○◎○○○	θ4	○◎○○○○
-θ5	◎○○○○○
+??	5???? ?? ?? ( ?? ) ???? = { ??0, ??1, ??2 ... ??5 }
+??0	???????	??1	???????	??2	???????	??3	???????	??4	???????
+??5	???????
 */
 #define THETA0 57
 #define THETA1 58
@@ -198,20 +198,20 @@ State is defigned like DELTA5 * _5 or GAMMA7 * _2
 #define THETA5 62
 #define THETA_MAX 6
 /*
-W	6개의 내 돌 ( ○ ) 존재 = { W }
-W	○○○○○○
+W	6???? ?? ?? ( ?? ) ???? = { W }
+W	???????
 */
 #define W 49
 
 //State is defigned like DELTA5 * _STATE_MAX + _5 or GAMMA7 * _2
 
 #define STATE_LENGTH 558
-// 50 * 9 + 1 개
+// 50 * 9 + 1 ??
 // -1 ~ 556
 
-/*	mw = must win, aw = amado win 을 의미한다.
-mw set : aw set 이 연속해서 3개 붙어 있을 때.
-aw set : { δ, θ set } X { _0, _2, _6, _8 }
+/*	mw = must win, aw = amado win ?? ??????.
+mw set : aw set ?? ??????? 3?? ??? ???? ??.
+aw set : { ??, ?? set } X { _0, _2, _6, _8 }
 */
 
 #define GENERATION_MAX 30
@@ -420,16 +420,16 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 	}
 	if (mine == WHITE) {
 		// Check _State
-		if ((start.x > MAP_LENGTH - 7) && (dir.x == 0 && dir.y == 1)) {  //EAST 견제
+		if ((start.x > MAP_LENGTH - 7) && (dir.x == 0 && dir.y == 1)) {  //EAST ????
 			_state = NONE_STATE;
 		}
-		else if ((start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 0)) { //SOUTH 견제
+		else if ((start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 0)) { //SOUTH ????
 			_state = NONE_STATE;
 		}
-		else if ((start.x < 7 || start.y > MAP_LENGTH - 7) && (dir.x == -1 && dir.y == 1)) { //NORTH_EAST 견제
+		else if ((start.x < 7 || start.y > MAP_LENGTH - 7) && (dir.x == -1 && dir.y == 1)) { //NORTH_EAST ????
 			_state = NONE_STATE;
 		}
-		else if ((start.x > MAP_LENGTH - 7 || start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 1)) {   //SOUTH_EAST 견제
+		else if ((start.x > MAP_LENGTH - 7 || start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 1)) {   //SOUTH_EAST ????
 			_state = NONE_STATE;
 		}
 		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.y * 7] == EMPTY) {
@@ -462,16 +462,16 @@ int get_state(int map[][MAP_LENGTH], int mine, vector start) {
 	}
 	else {
 		// Check _State
-		if ((start.x > MAP_LENGTH - 7) && (dir.x == 0 && dir.y == 1)) {  //EAST 견제
+		if ((start.x > MAP_LENGTH - 7) && (dir.x == 0 && dir.y == 1)) {  //EAST ????
 			_state = NONE_STATE;
 		}
-		else if ((start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 0)) { //SOUTH 견제
+		else if ((start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 0)) { //SOUTH ????
 			_state = NONE_STATE;
 		}
-		else if ((start.x < 7 || start.y > MAP_LENGTH - 7) && (dir.x == -1 && dir.y == 1)) { //NORTH_EAST 견제
+		else if ((start.x < 7 || start.y > MAP_LENGTH - 7) && (dir.x == -1 && dir.y == 1)) { //NORTH_EAST ????
 			_state = NONE_STATE;
 		}
-		else if ((start.x > MAP_LENGTH - 7 || start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 1)) {   //SOUTH_EAST 견제
+		else if ((start.x > MAP_LENGTH - 7 || start.y > MAP_LENGTH - 7) && (dir.x == 1 && dir.y == 1)) {   //SOUTH_EAST ????
 			_state = NONE_STATE;
 		}
 		else if (map[start.x][start.y] == EMPTY && map[start.x + dir.x * 7][start.y + dir.y * 7] == EMPTY) {
@@ -1047,8 +1047,8 @@ int aw_location(int state[][MAP_LENGTH][MAP_LENGTH], vector where[]) {
 int check_aw(int state[][MAP_LENGTH][MAP_LENGTH], vector start) {
 	//Check from state[start.dir][start.x][start.y] does it is aw.
 	//If right, return 1. Else return 0;
-	/*	mw = must win, aw = amado win 을 의미한다.
-	aw set : { δ, θ set } X { _0, _2, _6, _8 }
+	/*	mw = must win, aw = amado win ?? ??????.
+	aw set : { ??, ?? set } X { _0, _2, _6, _8 }
 	*/
 	int temp = state[start.dir][start.x][start.y];
 	int i = 0;
@@ -1212,7 +1212,7 @@ location* find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MA
 
 	// Decied where to put stone from candidate location list 'candidate'.
 	// ms, es, candidate, state_priority value with get_state_priority.
-	// 어디에 놓는 것이 내 state priority 를 최대화 시키면서, 상대 state priority 를 최소화 시키는지 확인 해야 한다.
+	// ?????? ???? ???? ?? state priority ?? ???? ?????, ???? state priority ?? ???? ??????? ??? ??? ???.
 	// Calculate where to put.
 
 	location to;
@@ -1248,7 +1248,7 @@ location* find_candidate_location(int map[][MAP_LENGTH], int ms[][MAP_LENGTH][MA
 				search_state(temp_ms, temp_es, temp_map, mine);
 				temp_mine = get_state_priority(temp_ms, priority);
 				temp_enemy = get_state_priority(temp_es, priority);
-				// Caculate changed priority or state.	
+				// Caculate changed priority or state.
 				if (now_mine < temp_mine) {
 					if (highest_mine < temp_mine) {
 						highest_mine = temp_mine;
@@ -1468,7 +1468,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 		if (state >= (SIGMA0 * _STATE_MAX + _0) && state < (THETA0 * _STATE_MAX + _0)) {
 			// if state is at SIGMA and remain turn is 2...
 			if (state == SIGMA0  * _STATE_MAX + _0 || state == SIGMA0  * _STATE_MAX + _2 || state == SIGMA0  * _STATE_MAX + _6 || state == SIGMA0  * _STATE_MAX + _8) {
-				//δ0	○○○○◎◎
+				//??0	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 5;
@@ -1487,7 +1487,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA1  * _STATE_MAX + _0 || state == SIGMA1  * _STATE_MAX + _2 || state == SIGMA1  * _STATE_MAX + _6 || state == SIGMA1  * _STATE_MAX + _8) {
-				//δ1	○○○◎○◎
+				//??1	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 4;
@@ -1506,7 +1506,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA2  * _STATE_MAX + _0 || state == SIGMA2  * _STATE_MAX + _2 || state == SIGMA2  * _STATE_MAX + _6 || state == SIGMA2  * _STATE_MAX + _8) {
-				//δ2	○○○◎◎○
+				//??2	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 4;
@@ -1525,7 +1525,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA3  * _STATE_MAX + _0 || state == SIGMA3  * _STATE_MAX + _2 || state == SIGMA3  * _STATE_MAX + _6 || state == SIGMA3  * _STATE_MAX + _8) {
-				//δ3	○○◎○○◎
+				//??3	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 3;
@@ -1544,7 +1544,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA4  * _STATE_MAX + _0 || state == SIGMA4  * _STATE_MAX + _2 || state == SIGMA4  * _STATE_MAX + _6 || state == SIGMA4  * _STATE_MAX + _8) {
-				//δ4	○○◎○◎○
+				//??4	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 3;
@@ -1563,7 +1563,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA5  * _STATE_MAX + _0 || state == SIGMA5  * _STATE_MAX + _2 || state == SIGMA5  * _STATE_MAX + _6 || state == SIGMA5  * _STATE_MAX + _8) {
-				//δ5	○○◎◎○○
+				//??5	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 4;
@@ -1582,7 +1582,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA6  * _STATE_MAX + _0 || state == SIGMA6  * _STATE_MAX + _2 || state == SIGMA6  * _STATE_MAX + _6 || state == SIGMA6  * _STATE_MAX + _8) {
-				//δ6	○◎○○○◎
+				//??6	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 2;
@@ -1601,7 +1601,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA7  * _STATE_MAX + _0 || state == SIGMA7  * _STATE_MAX + _2 || state == SIGMA7  * _STATE_MAX + _6 || state == SIGMA7  * _STATE_MAX + _8) {
-				//δ7	○◎○○◎○
+				//??7	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 5;
@@ -1620,7 +1620,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA8  * _STATE_MAX + _0 || state == SIGMA8  * _STATE_MAX + _2 || state == SIGMA8  * _STATE_MAX + _6 || state == SIGMA8  * _STATE_MAX + _8) {
-				//δ8	○◎○◎○○
+				//??8	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 4;
@@ -1639,7 +1639,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA9  * _STATE_MAX + _0 || state == SIGMA9  * _STATE_MAX + _2 || state == SIGMA9  * _STATE_MAX + _6 || state == SIGMA9  * _STATE_MAX + _8) {
-				//δ9	○◎◎○○○
+				//??9	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 3;
@@ -1658,7 +1658,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA10  * _STATE_MAX + _0 || state == SIGMA10  * _STATE_MAX + _2 || state == SIGMA10  * _STATE_MAX + _6 || state == SIGMA10  * _STATE_MAX + _8) {
-				//δ10	◎○○○○◎
+				//??10	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 6;
@@ -1677,7 +1677,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA11  * _STATE_MAX + _0 || state == SIGMA11  * _STATE_MAX + _2 || state == SIGMA11  * _STATE_MAX + _6 || state == SIGMA11  * _STATE_MAX + _8) {
-				//δ11	◎○○○◎○	
+				//??11	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 5;
@@ -1696,7 +1696,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA12  * _STATE_MAX + _0 || state == SIGMA12  * _STATE_MAX + _2 || state == SIGMA12  * _STATE_MAX + _6 || state == SIGMA12  * _STATE_MAX + _8) {
-				//δ12	◎○○◎○○	
+				//??12	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 4;
@@ -1715,7 +1715,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA13  * _STATE_MAX + _0 || state == SIGMA13  * _STATE_MAX + _2 || state == SIGMA13  * _STATE_MAX + _6 || state == SIGMA13  * _STATE_MAX + _8) {
-				//δ13	◎○◎○○○
+				//??13	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 3;
@@ -1734,7 +1734,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == SIGMA14  * _STATE_MAX + _0 || state == SIGMA14  * _STATE_MAX + _2 || state == SIGMA14  * _STATE_MAX + _6 || state == SIGMA14  * _STATE_MAX + _8) {
-				//δ14	◎◎○○○○
+				//??14	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 2;
@@ -1758,7 +1758,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 		if (state < (SIGMA0 * _STATE_MAX + _0) || state >= (THETA0 * _STATE_MAX + _0)) {
 			// if state is at THETA and remain turn is 1...
 			if (state == THETA0 * _STATE_MAX + _0 || state == THETA0 * _STATE_MAX + _2 || state == THETA0 * _STATE_MAX + _6 || state == THETA0 * _STATE_MAX + _8) {
-				//θ0	○○○○○◎
+				//??0	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 6;
@@ -1777,7 +1777,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == THETA1 * _STATE_MAX + _0 || state == THETA1 * _STATE_MAX + _2 || state == THETA1 * _STATE_MAX + _6 || state == THETA1 * _STATE_MAX + _8) {
-				//θ1	○○○○◎○
+				//??1	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 5;
@@ -1796,7 +1796,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == THETA2 * _STATE_MAX + _0 || state == THETA2 * _STATE_MAX + _2 || state == THETA2 * _STATE_MAX + _6 || state == THETA2 * _STATE_MAX + _8) {
-				//θ2	○○○◎○○
+				//??2	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 4;
@@ -1815,7 +1815,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == THETA3 * _STATE_MAX + _0 || state == THETA3 * _STATE_MAX + _2 || state == THETA3 * _STATE_MAX + _6 || state == THETA3 * _STATE_MAX + _8) {
-				//θ3	○○◎○○○
+				//??3	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 3;
@@ -1834,7 +1834,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == THETA4 * _STATE_MAX + _0 || state == THETA4 * _STATE_MAX + _2 || state == THETA4 * _STATE_MAX + _6 || state == THETA4 * _STATE_MAX + _8) {
-				//θ4	○◎○○○○
+				//??4	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 2;
@@ -1853,7 +1853,7 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 				}
 			}
 			else if (state == THETA5 * _STATE_MAX + _0 || state == THETA5 * _STATE_MAX + _2 || state == THETA5 * _STATE_MAX + _6 || state == THETA5 * _STATE_MAX + _8) {
-				//θ5	◎○○○○○
+				//??5	???????
 				if (start_location.dir == SOUTH) { // increase ( 0, 1 )
 					p_last->x = start_location.x + 0;
 					p_last->y = start_location.y + 1;
@@ -1878,6 +1878,27 @@ location* aw_doing(int state, vector start_location, int remain_turn) {
 }
 
 
+
+void print_state(int state)	{
+	int _state = state % _STATE_MAX;
+	int basic_state = (int)((state - _state) / _STATE_MAX);
+
+	if(basic_state >= ALPHA0 && basic_state < BETA0)	{
+		printf("ALPHA%d_%d", basic_state-ALPHA0, _state);
+	}
+	else if(basic_state >= BETA0 && basic_state < GAMMA0)
+		printf("BETA%d_%d", basic_state-BETA0, _state);
+	}
+	else if(basic_state >= GAMMA0 && basic_state < SIGMA0)	{
+		printf("GAMMA%d_%d", basic_state-GAMMA0, _state);
+	}
+	else if(basic_state >= SIGMA0 && basic_state < THETA0)	{
+		printf("SIGMA%d_%d", basic_state-SIGMA0, _state);
+	}
+	else if(basic_state >= THETA0 && basic_state < W)	{
+		printf("W");
+	}
+}
 
 void initialize_map(int map[][MAP_LENGTH]) {
 	// Initialize map to EMPTY which is defined.
@@ -1949,16 +1970,16 @@ void print_map(int map[][MAP_LENGTH]) {
 	for (i = 0; i < MAP_LENGTH; i++) {
 		for (j = 0; j < MAP_LENGTH; j++) {
 			if (map[i][j] == WHITE) {
-				printf("○");
+				printf("??");
 			}
 			else if (map[i][j] == BLACK) {
-				printf("●");
+				printf("??");
 			}
 			else if (map[i][j] == BLOCKING) {
-				printf("☆");
+				printf("??");
 			}
 			else {
-				printf("┼");
+				printf("??");
 			}
 		}
 		printf("\n");
